@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 This is a formal verification cookbook that bridges formal verification and agentic language systems. It contains:
+
 - **book**: Jupyter Book documentation about formal verification agents (Dafny, Lean, RL)
-- **evals**: Evaluation code to be imported/viewed in the ebook but also, given an API key, work e2e. 
+- **evals**: Evaluation code to be imported/viewed in the ebook but also, given an API key, work e2e.
 
 The project uses a uv workspace with two members (book, evals).
 
