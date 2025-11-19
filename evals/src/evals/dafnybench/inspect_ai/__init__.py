@@ -61,13 +61,6 @@ You may discuss your reasoning, but ensure somewhere in your final output is tri
 ### Example
 
 ```dafny
-method Main()
-{
-  print "5! = ";
-  print factorial(5);
-  print "\n";
-}
-
 function factorial(n: nat): nat
   requires n >= 0
   decreases n

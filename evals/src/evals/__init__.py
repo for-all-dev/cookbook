@@ -12,7 +12,7 @@ app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
 
 
 @app.command()
-def solve(
+def agent(
     benchmark: Annotated[
         str,
         typer.Argument(help="Benchmark name (e.g., 'dafnybench')"),
@@ -26,13 +26,13 @@ def solve(
         ),
     ] = "inspect",
     model: Annotated[
-        str | None,
+        str,
         typer.Option(
             "--model",
             "-m",
-            help="Model to evaluate (e.g., 'anthropic/claude-3-5-sonnet-20241022')",
+            help="Model to evaluate (default: anthropic/claude-sonnet-4-5)",
         ),
-    ] = None,
+    ] = "anthropic/claude-sonnet-4-5",
     limit: Annotated[
         int,
         typer.Option(
@@ -47,17 +47,17 @@ def solve(
 
     Examples:
 
-        # Run DafnyBench with Inspect AI (default: 10 samples, natural tool-based iteration)
-        uv run solve dafnybench --framework inspect
+        # Run DafnyBench with Inspect AI (default: Claude Sonnet 4.5, 10 samples)
+        uv run agent dafnybench
 
         # Run with all 782 samples
-        uv run solve dafnybench --framework inspect --limit -1
-
-        # Run with specific model
-        uv run solve dafnybench -f inspect -m anthropic/claude-3-5-sonnet-20241022
+        uv run agent dafnybench --limit -1
 
         # Test with just 5 samples
-        uv run solve dafnybench -f inspect --limit 5
+        uv run agent dafnybench --limit 5
+
+        # Use different model
+        uv run agent dafnybench -m anthropic/claude-opus-4
     """
     if benchmark.lower() == "dafnybench":
         if framework.lower().startswith("inspect"):
