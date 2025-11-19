@@ -19,18 +19,23 @@ Requirements:
 
 import re
 import time
-from typing import Any
 
-from datasets import load_dataset
 from inspect_ai import Task, task, eval
-from inspect_ai.dataset import Sample
-from inspect_ai.model import ChatMessageUser, Model
-from inspect_ai.scorer import Score, Target, accuracy, metric, scorer, stderr, Metric, Scorer
-from inspect_ai.solver import Generate, Solver, TaskState, solver, system_message
+from inspect_ai.model import Model
+from inspect_ai.scorer import Score, Target, accuracy, scorer, stderr, Scorer
+from inspect_ai.solver import TaskState, generate, system_message, use_tools
 from inspect_ai.util import sandbox
 
+from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
+from evals.dafnybench.inspect_ai.metrics import (
+    verification_time,
+    avg_attempts,
+    error_type_distribution,
+)
+from evals.dafnybench.inspect_ai.tools import verify_dafny
 
-# System prompt explaining Dafny verification
+
+# System prompt explaining Dafny verification with tool usage
 DAFNY_SYSTEM_PROMPT = """You are an expert in formal verification using Dafny.
 
 Your task is to add verification hints to Dafny programs so they can be verified by the Dafny compiler.
@@ -43,51 +48,12 @@ Your task is to add verification hints to Dafny programs so they can be verified
 4. **Postconditions** (`ensures`): Conditions guaranteed to hold when a function returns
 5. **Termination Measures** (`decreases`): Expressions that decrease on each recursive call or loop iteration
 
-## Guidelines
+## Using the verify_dafny Tool
 
-- Loop invariants are critical for verifying loops - they must be:
-  - True before the loop starts
-  - Preserved by each iteration
-  - Strong enough to prove the desired property after the loop
-
-- Assertions can help break down complex proofs into smaller steps
-
-- Preconditions and postconditions form the contract for functions
-
-- Decreases clauses prove termination of loops and recursion
-
-## Your Response
-
-Provide the complete Dafny program with all necessary verification hints added.
-Return ONLY the code, without markdown formatting or explanations.
+Once you've added verification hints, use the `verify_dafny` tool to check your work.
+Pass your complete Dafny program to the tool. If verification fails, analyze the error
+messages carefully and adjust your hints accordingly. Continue refining until verification succeeds.
 """
-
-
-def load_dafnybench_dataset() -> list[Sample]:
-    """
-    Load the DafnyBench dataset from Hugging Face.
-
-    Returns:
-        List of Sample objects with input (hints_removed code) and target (ground_truth code).
-    """
-    hf_dataset = load_dataset("wendy-sun/DafnyBench", split="test")
-
-    samples = []
-    for row in hf_dataset:
-        samples.append(
-            Sample(
-                input=f"Add verification hints to this Dafny code:\n\n{row['hints_removed']}",
-                target=row["ground_truth"],
-                metadata={
-                    "test_id": row["test_ID"],
-                    "test_file": row["test_file"],
-                    "hints_removed": row["hints_removed"],
-                    "ground_truth": row["ground_truth"],
-                },
-            )
-        )
-
-    return samples
 
 
 def extract_code(completion: str) -> str:
@@ -143,121 +109,15 @@ def categorize_error(stderr: str) -> str:
         return "other_error"
 
 
-@solver
-def dafny_solver(max_attempts: int | None = None) -> Solver:
-    """
-    Iterative repair solver that generates hints and retries with error feedback.
-
-    Args:
-        max_attempts: Maximum number of verification attempts (None = let Inspect AI decide naturally).
-
-    Returns:
-        Solver that implements iterative repair with error feedback.
-    """
-    async def solve(state: TaskState, generate: Generate) -> TaskState:
-        """
-        Solve the task by iteratively generating hints and verifying.
-        """
-        # If max_attempts is None, just do a single generate and let Inspect handle iterations
-        if max_attempts is None:
-            state = await generate(state)
-            state.metadata["attempts"] = 1
-            return state
-
-        attempts = 0
-
-        for attempt in range(1, max_attempts + 1):
-            attempts = attempt
-
-            # Generate hints
-            state = await generate(state)
-
-            # Extract code from completion
-            code = extract_code(state.output.completion)
-
-            # Try verification (dry run - actual scoring happens in scorer)
-            # We do this to provide error feedback for next attempt
-            try:
-                temp_file = f"/tmp/dafny_attempt_{state.metadata['test_id']}_{attempt}.dfy"
-                await sandbox().write_file(temp_file, code)
-
-                result = await sandbox().exec(
-                    ["dafny", "verify", temp_file],
-                    timeout=30,
-                )
-
-                # If verification succeeds, stop
-                if result.returncode == 0 and "0 errors" in result.stdout:
-                    state.metadata["attempts"] = attempts
-                    state.metadata["success_on_attempt"] = attempt
-                    break
-
-                # If this isn't the last attempt, add error feedback
-                if attempt < max_attempts:
-                    error_output = result.stderr if result.stderr else result.stdout
-                    state.messages.append(
-                        ChatMessageUser(
-                            content=f"Verification failed with the following error:\n\n{error_output}\n\n"
-                                   f"Please fix the verification hints and try again. "
-                                   f"Focus on the error message and adjust your invariants, assertions, "
-                                   f"or other hints accordingly."
-                        )
-                    )
-            except Exception as e:
-                # If we can't verify (e.g., Dafny not installed), continue
-                state.metadata["verification_error"] = str(e)
-                break
-
-        # Store final attempt count
-        state.metadata["attempts"] = attempts
-
-        return state
-
-    return solve
-
-
-@metric
-def verification_time() -> Metric:
-    """Metric to track average verification time per sample."""
-    def metric_fn(scores: list[Score]) -> float:
-        times = [
-            s.metadata.get("verification_time", 0)
-            for s in scores
-            if "verification_time" in s.metadata
-        ]
-        return sum(times) / len(times) if times else 0.0
-
-    return metric_fn
-
-
-@metric
-def avg_attempts() -> Metric:
-    """Metric to track average number of attempts per sample."""
-    def metric_fn(scores: list[Score]) -> float:
-        attempts = [
-            s.metadata.get("attempts", 0)
-            for s in scores
-            if "attempts" in s.metadata
-        ]
-        return sum(attempts) / len(attempts) if attempts else 0.0
-
-    return metric_fn
-
-
-@metric
-def error_type_distribution() -> Metric:
-    """Metric to show distribution of error types."""
-    def metric_fn(scores: list[Score]) -> dict[str, int]:
-        error_counts: dict[str, int] = {}
-        for s in scores:
-            error_type = s.metadata.get("error_type", "unknown")
-            error_counts[error_type] = error_counts.get(error_type, 0) + 1
-        return error_counts
-
-    return metric_fn
-
-
-@scorer(metrics=[accuracy(), stderr(), verification_time(), avg_attempts(), error_type_distribution()])
+@scorer(
+    metrics=[
+        accuracy(),
+        stderr(),
+        verification_time(),
+        avg_attempts(),
+        error_type_distribution(),
+    ]
+)
 def dafny_verifier() -> Scorer:
     """
     Score by running Dafny verification on the reconstructed program.
@@ -265,6 +125,7 @@ def dafny_verifier() -> Scorer:
     Executes Dafny locally and scores based on verification success.
     Tracks comprehensive metrics including time, attempts, and error types.
     """
+
     async def score(state: TaskState, target: Target) -> Score:
         """
         Score the completion by verifying with Dafny.
@@ -294,8 +155,10 @@ def dafny_verifier() -> Scorer:
             success = result.returncode == 0 and "0 errors" in result.stdout
 
             # Determine error type if failed
-            error_type = "success" if success else categorize_error(
-                result.stderr if result.stderr else result.stdout
+            error_type = (
+                "success"
+                if success
+                else categorize_error(result.stderr if result.stderr else result.stdout)
             )
 
             # Prepare explanation
@@ -303,7 +166,9 @@ def dafny_verifier() -> Scorer:
                 explanation = f"Verification succeeded in {verification_time_sec:.2f}s"
             else:
                 error_output = result.stderr if result.stderr else result.stdout
-                explanation = f"Verification failed ({error_type}):\n{error_output[:500]}"
+                explanation = (
+                    f"Verification failed ({error_type}):\n{error_output[:500]}"
+                )
 
             return Score(
                 value="C" if success else "I",
@@ -352,7 +217,6 @@ def dafny_verifier() -> Scorer:
 
 @task
 def dafnybench(
-    max_attempts: int | None = None,
     model: str | Model | None = None,
     sandbox: str = "local",
     limit: int | None = None,
@@ -363,8 +227,11 @@ def dafnybench(
     Evaluates language models on their ability to add verification hints
     to Dafny programs from the wendy-sun/DafnyBench dataset.
 
+    The task uses a tool-based approach where the agent has access to a verify_dafny
+    tool. The agent naturally iterates by calling the tool, receiving feedback, and
+    refining its approach until verification succeeds.
+
     Args:
-        max_attempts: Maximum verification attempts with error feedback (None = natural iteration).
         model: Model to evaluate (default: from INSPECT_EVAL_MODEL env var).
         sandbox: Sandbox type - use "local" if Dafny is installed locally (default: "local").
         limit: Limit number of samples to evaluate (default: all 782 samples).
@@ -373,11 +240,8 @@ def dafnybench(
         Task configured for DafnyBench evaluation.
 
     Example:
-        # Evaluate with natural iteration (default)
+        # Evaluate with natural tool-based iteration (default)
         inspect eval evals/dafnybench/inspect_ai.py
-
-        # Evaluate with explicit max attempts
-        inspect eval evals/dafnybench/inspect_ai.py -T max_attempts=3
 
         # Evaluate specific model
         inspect eval evals/dafnybench/inspect_ai.py -M anthropic/claude-3-5-sonnet-20241022
@@ -390,7 +254,8 @@ def dafnybench(
         dataset=dataset,
         solver=[
             system_message(DAFNY_SYSTEM_PROMPT),
-            dafny_solver(max_attempts=max_attempts),
+            use_tools(verify_dafny()),
+            generate(),  # Handles tool loop automatically
         ],
         scorer=dafny_verifier(),
         sandbox=sandbox,
@@ -398,7 +263,6 @@ def dafnybench(
 
 
 def run_dafnybench_eval(
-    max_attempts: int | None = None,
     model: str | None = None,
     limit: int | None = None,
 ) -> None:
@@ -406,14 +270,13 @@ def run_dafnybench_eval(
     Run DafnyBench evaluation programmatically.
 
     This function is called by the CLI and runs the evaluation using Inspect AI's eval() function.
+    The agent naturally handles iteration using the verify_dafny tool.
 
     Args:
-        max_attempts: Maximum verification attempts with error feedback (None = natural iteration).
         model: Model to evaluate (uses INSPECT_EVAL_MODEL env var if None).
         limit: Limit number of samples to evaluate (None = all samples).
     """
     task_obj = dafnybench(
-        max_attempts=max_attempts,
         model=model,
         limit=limit,
     )

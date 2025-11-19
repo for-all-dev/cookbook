@@ -22,14 +22,6 @@ def solve(
             help="Framework to use: 'inspect' or 'rawdog'",
         ),
     ] = "inspect",
-    max_attempts: Annotated[
-        int | None,
-        typer.Option(
-            "--max-attempts",
-            "-n",
-            help="Maximum verification attempts with error feedback (default: let Inspect AI decide)",
-        ),
-    ] = None,
     model: Annotated[
         str | None,
         typer.Option(
@@ -52,17 +44,17 @@ def solve(
 
     Examples:
 
-        # Run DafnyBench with Inspect AI (default: 10 samples, natural iteration)
+        # Run DafnyBench with Inspect AI (default: 10 samples, natural tool-based iteration)
         uv run solve dafnybench --framework inspect
 
         # Run with all 782 samples
         uv run solve dafnybench --framework inspect --limit -1
 
-        # Run with explicit max attempts
-        uv run solve dafnybench --framework inspect --max-attempts 3
-
         # Run with specific model
         uv run solve dafnybench -f inspect -m anthropic/claude-3-5-sonnet-20241022
+
+        # Test with just 5 samples
+        uv run solve dafnybench -f inspect --limit 5
     """
     if benchmark.lower() == "dafnybench":
         if framework.lower() == "inspect":
@@ -71,12 +63,10 @@ def solve(
             # Convert limit=-1 to None (all samples)
             eval_limit = None if limit == -1 else limit
 
-            if max_attempts is not None:
-                typer.echo(f"Running DafnyBench with Inspect AI (max_attempts={max_attempts}, limit={limit if limit != -1 else 'all'})...")
-            else:
-                typer.echo(f"Running DafnyBench with Inspect AI (natural iteration, limit={limit if limit != -1 else 'all'})...")
+            typer.echo(
+                f"Running DafnyBench with Inspect AI (tool-based agent, limit={limit if limit != -1 else 'all'})..."
+            )
             run_dafnybench_eval(
-                max_attempts=max_attempts,
                 model=model,
                 limit=eval_limit,
             )

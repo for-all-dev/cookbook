@@ -23,3 +23,6 @@ wheels/
 
 # Environment variables
 .env
+
+# inspect and other logs
+logs/

@@ -2,7 +2,7 @@
 
 ## Running the code (`evals`)
 
-I think the book is a valuable read if you're not literally poking at and running the code. The code exists to be excerpted in the book, but I also want it to run e2e for real.
+I think the book is a valuable read if you're not literally poking at and running the code. The code exists to be excerpted in the book, but I also want it to run e2e for real. It'd also be good to periodically dump your understanding of the book chapters into claude code, see what it does, then come back to my repo to compare.
 
 Need `ANTHROPIC_API_KEY` to be set. Defaults are to run sonnet on not that many samples, so toying around with the ebook code should only cost like 5 bucks tops.
 
