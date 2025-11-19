@@ -21,9 +21,9 @@ import re
 import time
 
 from inspect_ai import Task, task, eval
-from inspect_ai.model import Model
+from inspect_ai.model import ChatMessageSystem, Model
 from inspect_ai.scorer import Score, Target, accuracy, scorer, stderr, Scorer
-from inspect_ai.solver import TaskState, generate, system_message, use_tools
+from inspect_ai.solver import Generate, TaskState, generate, solver, use_tools
 from inspect_ai.util import sandbox
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
@@ -287,10 +287,19 @@ def dafnybench(
     if limit is not None:
         dataset = dataset[:limit]
 
+    @solver
+    def add_system_prompt():
+        """Add system prompt without template formatting."""
+        async def solve(state: TaskState, generate: Generate):
+            # Add system message directly without template formatting
+            state.messages.insert(0, ChatMessageSystem(content=DAFNY_SYSTEM_PROMPT))
+            return state
+        return solve
+
     return Task(
         dataset=dataset,
         solver=[
-            system_message(DAFNY_SYSTEM_PROMPT),
+            add_system_prompt(),
             use_tools(verify_dafny()),
             generate(),  # Handles tool loop automatically
         ],

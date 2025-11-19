@@ -16,10 +16,13 @@ project:
         - pattern: 01-introduction/*.md
     - title: Dafny
       children:
-        - pattern: 02-dafny/*.md
+        - pattern: 02-dafny-and-inspect/*.md
+    - title: "Dafny part 2: no framework"
+      children:
+        - pattern: 03-dafny-and-rawdog/*.md
     - title: Lean
       children:
-        - pattern: 03-lean/*.md
+        - pattern: 04-lean-and-pydanticai/*.md
     - title: RL
       children:
         - pattern: 04-rl/*.md
