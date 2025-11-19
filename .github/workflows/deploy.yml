@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Change if your default branch is different
+      - master
 
 jobs:
   build-and-deploy:
@@ -26,7 +26,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           SERVER_USER: quinn
-          SERVER_HOST: 45.55.223.113
+          SERVER_HOST: ${{ secrets.FORALLDEV_IP4 }}
         run: |
           # Set up SSH key
           mkdir -p ~/.ssh
