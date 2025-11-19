@@ -31,4 +31,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && git pull origin master"
 
           # Copy static files and sync dependencies
-          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && /home/quinn/.local/bin/uv sync && sudo systemctl restart cookbook"
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && /home/quinn/.local/bin/uv sync && sudo systemctl restart nginx"
