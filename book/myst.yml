@@ -30,5 +30,5 @@ site:
   template: book-theme
   options:
     folders: true
-    favicon: ./../static/img/forall.ico
-    logo: ./../static/img/forall.svg
+    favicon: ./static/img/forall.ico
+    logo: ./static/img/forall.svg
