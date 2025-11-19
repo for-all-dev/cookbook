@@ -6,11 +6,13 @@ After=network.target
 Type=simple
 User=quinn
 WorkingDirectory=/home/quinn/cookbook/book
-ExecStart=/home/quinn/.local/bin/uv run jupyter book start --port 3000 --headless
+ExecStart=/bin/bash -c 'fuser -k 3000/tcp 2>/dev/null || true; /home/quinn/.local/bin/uv run jupyter book start --port 3000 --headless'
 Restart=always
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+KillMode=mixed
+KillSignal=SIGTERM
 
 [Install]
 WantedBy=multi-user.target
