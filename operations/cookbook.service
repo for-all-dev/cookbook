@@ -6,8 +6,6 @@ After=network.target
 Type=simple
 User=quinn
 WorkingDirectory=/home/quinn/cookbook/book
-Environment="HOST=recipes.for-all.dev"
-Environment="BASE_URL=https://recipes.for-all.dev"
 ExecStart=/home/quinn/.local/bin/uv run jupyter book start --port 3000
 Restart=always
 RestartSec=10
