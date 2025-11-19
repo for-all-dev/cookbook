@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a formal verification cookbook that bridges formal verification and agentic language systems. It contains:
 - **book**: Jupyter Book documentation about formal verification agents (Dafny, Lean, RL)
-- **evals**: Evaluation framework using pydantic-ai
+- **evals**: Evaluation code to be imported/viewed in the ebook but also, given an API key, work e2e. 
 
 The project uses a uv workspace with two members (book, evals).
 
@@ -63,10 +63,10 @@ uv sync
 
 ### Evals Package
 
-- Entry point: `evals:main` defined in project.scripts
-- Uses pydantic-ai for LLM-based evaluations
-- Uses datasets library for data handling
-- Build backend: uv_build
+- in `evals.dafnybench`, we're working with `wendy-sun/DafnyBench` on huggingface.
+  - `evals.dafnybench.inspect_ai` will do it with the `inspect_ai` framework
+  - `evals.dafnybench.rawdog` will do it with pure python and the anthropic SDK.
+- in `evals.fvapps`, we're working with `quinn-dougherty/fvapps` on huggingface, which we'll do with `pydantic_ai`
 
 ### Book Architecture
 
