@@ -2,7 +2,7 @@
 version: 1
 project:
   id: dbdf11b8-86a4-4da5-b9fc-05e4d01f51c5
-  title: Formal Verification Agent Recipes
+  title: prealpha; Formal Verification Agent Recipes
   description: |
     Bridging the two cultures between formal verification and modern agentic language systems
   keywords: []

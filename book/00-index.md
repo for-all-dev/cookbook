@@ -1,9 +1,9 @@
 ---
-title: Formal Verification Agent Recipes
+title: prealpha; Formal Verification Agent Recipes
 site:
-  hide_outline: true
+  hide_outline: false
   hide_toc: false
-  hide_title_block: true
+  hide_title_block: false
 ---
 
 ```{epigraph}
@@ -11,6 +11,9 @@ In distant land, unreachable by your steps, there stands a castle known as Monsa
 
 -- Lohengrin, *Lohengrin* Act III, Scene 3
 ```
+
+# TODO: this is an ALPHA. This is not released yet.
+Please don't send it around to your friends yet. 
 
 +++ {"kind": "centered"}
 
