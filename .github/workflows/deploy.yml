@@ -39,8 +39,5 @@ jobs:
           # Pull latest code on server
           ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && git pull origin master"
 
-          # Sync dependencies
-          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && uv sync"
-
-          # Restart cookbook service
-          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "sudo systemctl restart cookbook"
+          # Sync dependencies and restart service
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && /home/quinn/.local/bin/uv sync && sudo systemctl restart cookbook"
