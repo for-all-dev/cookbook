@@ -37,7 +37,7 @@ jobs:
           ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
 
           # Pull latest code on server
-          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && git pull"
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && git pull origin master"
 
           # Sync dependencies
           ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && uv sync"
