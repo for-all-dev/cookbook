@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 User=quinn
 WorkingDirectory=/home/quinn/cookbook/book
+Environment="NODE_ENV=production"
 ExecStart=/home/quinn/.local/bin/uv run jupyter book start --port 3000
 Restart=always
 RestartSec=10
