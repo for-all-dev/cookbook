@@ -21,9 +21,9 @@ import re
 import time
 
 from inspect_ai import Task, task, eval
-from inspect_ai.model import ChatMessageSystem, Model
+from inspect_ai.model import Model
 from inspect_ai.scorer import Score, Target, accuracy, scorer, stderr, Scorer
-from inspect_ai.solver import Generate, TaskState, generate, solver, use_tools
+from inspect_ai.solver import TaskState, generate, system_message, use_tools
 from inspect_ai.util import sandbox
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
@@ -36,6 +36,7 @@ from evals.dafnybench.inspect_ai.tools import verify_dafny
 
 
 # System prompt explaining Dafny verification with tool usage
+# Note: Double braces {{}} escape them in format strings
 DAFNY_SYSTEM_PROMPT = """You are an expert in formal verification using Dafny.
 
 Your task is to add verification hints to Dafny programs so they can be verified by the Dafny compiler.
@@ -64,24 +65,24 @@ You may discuss your reasoning, but ensure somewhere in your final output is tri
 function factorial(n: nat): nat
   requires n >= 0
   decreases n
-{
+{{
   if n == 0 then 1 else n * factorial(n - 1)
-}
+}}
 
 method FactorialIter(n: nat) returns (r: nat)
   requires n >= 0
   ensures r == factorial(n)
-{
+{{
   r := 1;
   var i := 1;
   while i <= n
     invariant 1 <= i <= n + 1
     invariant r == factorial(i - 1)
-  {
+  {{
     r := r * i;
     i := i + 1;
-  }
-}
+  }}
+}}
 ```
 """
 
@@ -280,19 +281,10 @@ def dafnybench(
     if limit is not None:
         dataset = dataset[:limit]
 
-    @solver
-    def add_system_prompt():
-        """Add system prompt without template formatting."""
-        async def solve(state: TaskState, generate: Generate):
-            # Add system message directly without template formatting
-            state.messages.insert(0, ChatMessageSystem(content=DAFNY_SYSTEM_PROMPT))
-            return state
-        return solve
-
     return Task(
         dataset=dataset,
         solver=[
-            add_system_prompt(),
+            system_message(DAFNY_SYSTEM_PROMPT),
             use_tools(verify_dafny()),
             generate(),  # Handles tool loop automatically
         ],

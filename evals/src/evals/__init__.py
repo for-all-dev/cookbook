@@ -59,7 +59,7 @@ def agent(
         # Use different model
         uv run agent dafnybench -m anthropic/claude-opus-4
     """
-    if benchmark.lower() == "dafnybench":
+    if benchmark.lower().startswith("dafny"):
         if framework.lower().startswith("inspect"):
             # Convert limit=-1 to None (all samples)
             eval_limit = None if limit == -1 else limit
