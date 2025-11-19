@@ -53,6 +53,43 @@ Your task is to add verification hints to Dafny programs so they can be verified
 Once you've added verification hints, use the `verify_dafny` tool to check your work.
 Pass your complete Dafny program to the tool. If verification fails, analyze the error
 messages carefully and adjust your hints accordingly. Continue refining until verification succeeds.
+
+## Format
+
+You may discuss your reasoning, but ensure somewhere in your final output is triple backtick code block.
+
+### Example
+
+```dafny
+method Main()
+{
+  print "5! = ";
+  print factorial(5);
+  print "\n";
+}
+
+function factorial(n: nat): nat
+  requires n >= 0
+  decreases n
+{
+  if n == 0 then 1 else n * factorial(n - 1)
+}
+
+method FactorialIter(n: nat) returns (r: nat)
+  requires n >= 0
+  ensures r == factorial(n)
+{
+  r := 1;
+  var i := 1;
+  while i <= n
+    invariant 1 <= i <= n + 1
+    invariant r == factorial(i - 1)
+  {
+    r := r * i;
+    i := i + 1;
+  }
+}
+```
 """
 
 

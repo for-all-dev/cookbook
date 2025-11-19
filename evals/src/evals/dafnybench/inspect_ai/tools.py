@@ -24,6 +24,13 @@ def verify_dafny():
         Returns:
             Success message if verification passes, or raises ToolError with diagnostics.
         """
+        # Check for verification bypass attempts (following DafnyBench methodology)
+        if "{:verify false}" in code.lower():
+            raise ToolError(
+                "Invalid code: contains {:verify false} which bypasses verification. "
+                "You must properly verify the code with correct annotations."
+            )
+
         # Write code to temporary file
         temp_file = "/tmp/dafny_verify.dfy"
         await sandbox().write_file(temp_file, code)

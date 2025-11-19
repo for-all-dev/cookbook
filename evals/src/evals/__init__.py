@@ -5,6 +5,9 @@ Evals CLI for formal verification benchmarks.
 import typer
 from typing_extensions import Annotated
 
+from evals.dafnybench.inspect_ai import run_dafnybench_eval
+
+
 app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
 
 
@@ -57,9 +60,7 @@ def solve(
         uv run solve dafnybench -f inspect --limit 5
     """
     if benchmark.lower() == "dafnybench":
-        if framework.lower() == "inspect":
-            from evals.dafnybench.inspect_ai import run_dafnybench_eval
-
+        if framework.lower().startswith("inspect"):
             # Convert limit=-1 to None (all samples)
             eval_limit = None if limit == -1 else limit
 
