@@ -1,0 +1,16 @@
+[Unit]
+Description=Formal Verification Cookbook - MyST Server
+After=network.target
+
+[Service]
+Type=simple
+User=quinn
+WorkingDirectory=/home/quinn/cookbook/book
+ExecStart=/home/quinn/.local/bin/uv run jupyter book start --port 3000
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

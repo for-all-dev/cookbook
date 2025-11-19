@@ -20,3 +20,5 @@ wheels/
 
 # Virtual environments
 .venv
+
+nginx-cookbook.conf

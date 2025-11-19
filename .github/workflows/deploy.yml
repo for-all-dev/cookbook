@@ -1,0 +1,46 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change if your default branch is different
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Deploy to server via SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SERVER_USER: quinn
+          SERVER_HOST: 45.55.223.113
+        run: |
+          # Set up SSH key
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Add server to known_hosts
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+          # Pull latest code on server
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && git pull"
+
+          # Sync dependencies
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "cd /home/quinn/cookbook && uv sync"
+
+          # Restart cookbook service
+          ssh -i ~/.ssh/deploy_key $SERVER_USER@$SERVER_HOST "sudo systemctl restart cookbook"
