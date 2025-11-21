@@ -24,7 +24,9 @@ Agents, evals, and RL environments for the working proof engineer.
 
 [Get Started](/introduction/ch0)
 
-## Table of contents at a glance
++++ {"kind": "left"}
+
+## Table of contents at a glance (PLANNED)
 
 1. Introduction. Setting scope, defining terms.
 2. DafnyBench (Dafny) with `inspect-ai`. Quickest MVP with free agents and logging/dashboards

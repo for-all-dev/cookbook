@@ -25,10 +25,10 @@ project:
         - pattern: 04-lean-and-pydanticai/*.md
     - title: RL
       children:
-        - pattern: 04-rl/*.md
+        - pattern: 05-rl/*.md
     - title: Outlook
       children:
-        - pattern: 05-outlook/*.md
+        - pattern: 06-outlook/*.md
 site:
   template: book-theme
   options:
