@@ -15,12 +15,12 @@ from mpl_toolkits.mplot3d import proj3d
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from PIL import Image, ImageDraw, ImageFont
 
-# --- helper: make an emoji image (swap font to emoji-capable font locally) ---
-def make_emoji_image(char="🤖", size=64):
+# --- helper: make an emoji image ---
+def make_emoji_image(char="🤖", size=512):
     img = Image.new("RGBA", (size, size), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
     try:
-        # jank to force robot emoji rednering
+        # jank to force robot emoji rendering
         font = ImageFont.truetype("/usr/share/fonts/noto/NotoColorEmoji.ttf", size=int(size*0.8))
     except Exception:
         font = ImageFont.load_default()
@@ -31,7 +31,7 @@ def make_emoji_image(char="🤖", size=64):
     draw.text(((size - w) / 2, (size - h) / 2), char, font=font, fill=(0, 0, 0, 255))
     return img
 
-emoji_img = make_emoji_image("🤖", size=64)
+emoji_img = make_emoji_image("🤖", size=512)
 
 # Helix parameter
 t = np.linspace(0, 10 * np.pi, 800)
@@ -103,9 +103,12 @@ forall = "∀"
 for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
-# LLM toolcalls: robot emoji as scatter markers
+# LLM toolcalls: robot emoji images projected into 2D
+oi = OffsetImage(emoji_img, zoom=0.15)  # Adjust zoom to match s=100 size from scatter
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    ax.scatter(xm, ym, zm, marker='$🤖$', s=5000, c='black')
+    x2, y2, _ = proj3d.proj_transform(xm, ym, zm, ax.get_proj())
+    ab = AnnotationBbox(oi, (x2, y2), xycoords='data', frameon=False)
+    ax.add_artist(ab)
 
 # Arrow along time at far right
 arrow_x0 = t_max
