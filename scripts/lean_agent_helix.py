@@ -103,12 +103,9 @@ forall = "∀"
 for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
-# LLM toolcalls: robot emoji images projected into 2D
-oi = OffsetImage(emoji_img, zoom=2.0)  # Much bigger: 5-10x the original 0.3
+# LLM toolcalls: robot emoji as scatter markers
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    x2, y2, _ = proj3d.proj_transform(xm, ym, zm, ax.get_proj())
-    ab = AnnotationBbox(oi, (x2, y2), xycoords='data', frameon=False)
-    ax.add_artist(ab)
+    ax.scatter(xm, ym, zm, marker='$🤖$', s=5000, c='black')
 
 # Arrow along time at far right
 arrow_x0 = t_max
