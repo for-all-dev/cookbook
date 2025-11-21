@@ -138,4 +138,10 @@ ax.set_zlabel("")
 ax.set_title("MVP of lean agent (its a loop)")
 
 plt.tight_layout()
+
+# Save to book static directory
+output_path = "./book/static/lean-agent-helix.png"
+plt.savefig(output_path, dpi=150, bbox_inches='tight')
+print(f"Saved figure to {output_path}")
+
 plt.show()
