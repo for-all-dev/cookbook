@@ -23,3 +23,14 @@ Please don't send it around to your friends yet.
 Agents, evals, and RL environments for the working proof engineer.
 
 [Get Started](/introduction/ch0)
+
+## Table of contents at a glance
+
+1. Introduction. Setting scope, defining terms.
+2. DafnyBench (Dafny) with `inspect-ai`. Quickest MVP with free agents and logging/dashboards
+3. DafnyBench no-framework. Dispell any suspicions about the complicated framework by feeling the purepython and anthropic SDK under your fingernails.
+4. FVAPPS (Lean) with `pydantic-ai`, more flexible than `inspect-ai`
+5. From evals to RL envs. How much SFT do you need to bootstrap, and how to get those tokens. Curricula design.
+6. Outlook. Please measure verification burden
+
+Chapters 2-4 will have code in the repo in the `./evals` subdir. 
