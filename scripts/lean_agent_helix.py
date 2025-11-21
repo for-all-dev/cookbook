@@ -11,27 +11,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-from mpl_toolkits.mplot3d import proj3d
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from PIL import Image, ImageDraw, ImageFont
-
-# --- helper: make an emoji image ---
-def make_emoji_image(char="🤖", size=512):
-    img = Image.new("RGBA", (size, size), (255, 255, 255, 0))
-    draw = ImageDraw.Draw(img)
-    try:
-        # jank to force robot emoji rendering
-        font = ImageFont.truetype("/usr/share/fonts/noto/NotoColorEmoji.ttf", size=int(size*0.8))
-    except Exception:
-        font = ImageFont.load_default()
-    # Use textbbox instead of deprecated textsize
-    bbox = draw.textbbox((0, 0), char, font=font)
-    w = bbox[2] - bbox[0]
-    h = bbox[3] - bbox[1]
-    draw.text(((size - w) / 2, (size - h) / 2), char, font=font, fill=(0, 0, 0, 255))
-    return img
-
-emoji_img = make_emoji_image("🤖", size=512)
 
 # Helix parameter
 t = np.linspace(0, 10 * np.pi, 800)
@@ -103,12 +82,10 @@ forall = "∀"
 for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
-# LLM toolcalls: robot emoji images projected into 2D
-oi = OffsetImage(emoji_img, zoom=0.8)  # Much bigger to match forall symbol size
+# LLM toolcalls: robot emoji as text
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    x2, y2, _ = proj3d.proj_transform(xm, ym, zm, ax.get_proj())
-    ab = AnnotationBbox(oi, (x2, y2), xycoords='data', frameon=False)
-    ax.add_artist(ab)
+    ax.text(xm, ym, zm, "🤖", fontsize=32, ha='center', va='center',
+            fontproperties={'family': 'Noto Color Emoji'})
 
 # Arrow along time at far right
 arrow_x0 = t_max
