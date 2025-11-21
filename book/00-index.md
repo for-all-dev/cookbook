@@ -35,4 +35,4 @@ Agents, evals, and RL environments for the working proof engineer.
 5. From evals to RL envs. How much SFT do you need to bootstrap, and how to get those tokens. Curricula design.
 6. Outlook. Please measure verification burden
 
-Chapters 2-4 will have code in the repo in the `./evals` subdir. 
+Chapters 2-4 will have code in the repo in the `./evals` subdir, maybe 5 as well. 
