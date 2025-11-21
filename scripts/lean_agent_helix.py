@@ -20,8 +20,8 @@ def make_emoji_image(char="🤖", size=64):
     img = Image.new("RGBA", (size, size), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
     try:
-        # On your machine, point this to an emoji font (e.g. Noto Color Emoji, Apple Color Emoji)
-        font = ImageFont.truetype("DejaVuSans.ttf", size=int(size*0.8))
+        # jank to force robot emoji rednering
+        font = ImageFont.truetype("/usr/share/fonts/noto/NotoColorEmoji.ttf", size=int(size*0.8))
     except Exception:
         font = ImageFont.load_default()
     # Use textbbox instead of deprecated textsize
@@ -104,28 +104,33 @@ for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
 # LLM toolcalls: robot emoji images projected into 2D
-oi = OffsetImage(emoji_img, zoom=0.3)
+oi = OffsetImage(emoji_img, zoom=2.0)  # Much bigger: 5-10x the original 0.3
 for xm, ym, zm in zip(x_max, y_max, z_max):
     x2, y2, _ = proj3d.proj_transform(xm, ym, zm, ax.get_proj())
     ab = AnnotationBbox(oi, (x2, y2), xycoords='data', frameon=False)
     ax.add_artist(ab)
 
-# --- Tiny arrowhead at far end of helix (along tangent) ---
-
-# Approximate tangent at end using last two points
-x_end, y_end, z_end = x[-1], y[-1], z[-1]
-dx = x[-1] - x[-2]
-dy = y[-1] - y[-2]
-dz = z[-1] - z[-2]
-norm = np.sqrt(dx**2 + dy**2 + dz**2)
-dx, dy, dz = dx / norm, dy / norm, dz / norm
+# Arrow along time at far right
+arrow_x0 = t_max
+arrow_y0 = 0
+arrow_z0 = 0
 
 ax.quiver(
-    x_end, y_end, z_end,
-    dx, dy, dz,
-    length=1.5,
-    arrow_length_ratio=0.6,
-    color="black"
+    arrow_x0, arrow_y0, arrow_z0,
+    1.0, 0.0, 0.0,
+    length=5.0,
+    arrow_length_ratio=0.3,
+    color='black'
+)
+
+ax.text(
+    arrow_x0 + 5.5,
+    arrow_y0,
+    arrow_z0,
+    "time →",
+    fontsize=11,
+    ha='left',
+    va='center'
 )
 
 # Kill ticks, tick labels, and z-axis label
