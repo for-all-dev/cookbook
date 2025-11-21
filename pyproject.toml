@@ -1,10 +1,11 @@
 [tool.uv.sources]
 book = { workspace = true }
-lab = { workspace = true }
 evals = { workspace = true }
+scripts = { workspace = true }
 
 [tool.uv.workspace]
 members = [
     "book",
     "evals",
+    "scripts",
 ]

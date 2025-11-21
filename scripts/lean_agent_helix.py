@@ -24,7 +24,10 @@ def make_emoji_image(char="🤖", size=64):
         font = ImageFont.truetype("DejaVuSans.ttf", size=int(size*0.8))
     except Exception:
         font = ImageFont.load_default()
-    w, h = draw.textsize(char, font=font)
+    # Use textbbox instead of deprecated textsize
+    bbox = draw.textbbox((0, 0), char, font=font)
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
     draw.text(((size - w) / 2, (size - h) / 2), char, font=font, fill=(0, 0, 0, 255))
     return img
 
