@@ -104,7 +104,7 @@ for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
 # LLM toolcalls: robot emoji images projected into 2D
-oi = OffsetImage(emoji_img, zoom=0.15)  # Adjust zoom to match s=100 size from scatter
+oi = OffsetImage(emoji_img, zoom=0.8)  # Much bigger to match forall symbol size
 for xm, ym, zm in zip(x_max, y_max, z_max):
     x2, y2, _ = proj3d.proj_transform(xm, ym, zm, ax.get_proj())
     ab = AnnotationBbox(oi, (x2, y2), xycoords='data', frameon=False)
