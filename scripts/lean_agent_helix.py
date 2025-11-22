@@ -10,7 +10,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+# Load emoji font by direct path
+emoji_font = fm.FontProperties(fname='/usr/share/fonts/noto/NotoColorEmoji.ttf')
 
 # Helix parameter
 t = np.linspace(0, 10 * np.pi, 800)
@@ -85,7 +89,7 @@ for xn, yn, zn in zip(x_min, y_min, z_min):
 # LLM toolcalls: robot emoji as text
 for xm, ym, zm in zip(x_max, y_max, z_max):
     ax.text(xm, ym, zm, "🤖", fontsize=32, ha='center', va='center',
-            fontproperties={'family': 'Noto Color Emoji'})
+            fontproperties=emoji_font)
 
 # Arrow along time at far right
 arrow_x0 = t_max
@@ -128,5 +132,3 @@ plt.tight_layout()
 output_path = "./book/static/img/lean-agent-helix.png"
 plt.savefig(output_path, dpi=150, bbox_inches='tight')
 print(f"Saved figure to {output_path}")
-
-plt.show()
