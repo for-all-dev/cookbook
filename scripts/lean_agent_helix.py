@@ -104,17 +104,7 @@ ax.quiver(
     color='black'
 )
 
-ax.text(
-    arrow_x0 + 5.5,
-    arrow_y0,
-    arrow_z0,
-    "time →",
-    fontsize=11,
-    ha='left',
-    va='center'
-)
-
-# Kill ticks, tick labels, and z-axis label
+# Kill ticks and tick labels
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_zticks([])
@@ -122,6 +112,9 @@ ax.set_xticklabels([])
 ax.set_yticklabels([])
 ax.set_zticklabels([])
 ax.set_zlabel("")
+
+# Set x-axis label to "time"
+ax.set_xlabel("time", fontsize=11)
 
 # Title
 ax.set_title("MVP of lean agent (its a loop)")
