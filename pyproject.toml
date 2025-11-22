@@ -9,3 +9,17 @@ members = [
     "evals",
     "scripts",
 ]
+
+[tool.ruff.lint]
+select = ["F", "UP", "I", "D", "PT"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.148.1",
+    "pytest>=9.0.1",
+    "ruff>=0.14.5",
+    "ty>=0.0.1a26",
+]

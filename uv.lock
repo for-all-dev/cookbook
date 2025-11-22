@@ -13,6 +13,14 @@ members = [
     "scripts",
 ]
 
+[manifest.dependency-groups]
+dev = [
+    { name = "hypothesis", specifier = ">=6.148.1" },
+    { name = "pytest", specifier = ">=9.0.1" },
+    { name = "ruff", specifier = ">=0.14.5" },
+    { name = "ty", specifier = ">=0.0.1a26" },
+]
+
 [[package]]
 name = "ag-ui-protocol"
 version = "0.1.10"
@@ -841,14 +849,6 @@ dependencies = [
     { name = "typer" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "hypothesis" },
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "ty" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "anthropic", specifier = ">=0.73.0" },
@@ -857,14 +857,6 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.12.4" },
     { name = "pydantic-ai", specifier = ">=1.19.0" },
     { name = "typer", specifier = ">=0.20.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "hypothesis", specifier = ">=6.148.1" },
-    { name = "pytest", specifier = ">=9.0.1" },
-    { name = "ruff", specifier = ">=0.14.5" },
-    { name = "ty", specifier = ">=0.0.1a26" },
 ]
 
 [[package]]
