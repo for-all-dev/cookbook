@@ -1,6 +1,8 @@
 pre-push:
   jobs:
-    - name: format
-      run: uv run ruff format
-    - name: lint
-      run: uv run ruff check --fix
+    - name: format python
+      run: uv run ruff format --check
+    - name: lint python
+      run: uv run ruff check
+    - name: prettier
+      run: prettier -w . --ignore-path .gitignore
