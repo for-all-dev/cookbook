@@ -16,7 +16,7 @@ Requirements:
     - Install via: https://github.com/dafny-lang/dafny/releases
 """
 
-import tempfile
+import uuid
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
@@ -49,11 +49,9 @@ def dafny_verifier() -> Scorer:
         # Extract code using the specified strategy
         code = extract_code(state, strategy=strategy)
 
-        # Create temporary file with proper cleanup
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".dfy", delete=False
-        ) as tmp:
-            temp_path = tmp.name
+        # Generate unique temporary file path
+        # Sandbox manages the file lifecycle, so we just need a unique name
+        temp_path = f"/tmp/dafny_score_{uuid.uuid4().hex}.dfy"
 
         try:
             # Write code to temporary file

@@ -1,6 +1,6 @@
 """Tools for DafnyBench evaluation."""
 
-import tempfile
+import uuid
 
 from inspect_ai.tool import ToolError, tool
 from inspect_ai.util import sandbox
@@ -31,9 +31,9 @@ def verify_dafny():
                 "You must properly verify the code with correct annotations."
             )
 
-        # Create temporary file with proper cleanup
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".dfy", delete=False) as tmp:
-            temp_path = tmp.name
+        # Generate unique temporary file path
+        # Sandbox manages the file lifecycle, so we just need a unique name
+        temp_path = f"/tmp/dafny_verify_{uuid.uuid4().hex}.dfy"
 
         # Write code to temporary file
         await sandbox().write_file(temp_path, code)
