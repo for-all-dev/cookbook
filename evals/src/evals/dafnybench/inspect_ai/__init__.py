@@ -16,14 +16,7 @@ Requirements:
     - Install via: https://github.com/dafny-lang/dafny/releases
 """
 
-import time
-
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
-from evals.dafnybench.inspect_ai.metrics import (
-    avg_attempts,
-    error_type_distribution,
-    verification_time,
-)
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 from evals.dafnybench.inspect_ai.utils import categorize_error, extract_code
@@ -35,26 +28,15 @@ from inspect_ai.solver import TaskState, generate, system_message, use_tools
 from inspect_ai.util import sandbox
 
 
-@scorer(
-    metrics=[
-        accuracy(),
-        stderr(),
-        verification_time(),
-        avg_attempts(),
-        error_type_distribution(),
-    ]
-)
+@scorer(metrics=[accuracy(), stderr()])
 def dafny_verifier() -> Scorer:
     """Score by running Dafny verification on the reconstructed program.
 
     Executes Dafny locally and scores based on verification success.
-    Tracks comprehensive metrics including time, attempts, and error types.
     """
 
     async def score(state: TaskState, target: Target) -> Score:
         """Score the completion by verifying with Dafny."""
-        start_time = time.time()
-
         # Extract code from completion
         code = extract_code(state.output.completion)
 
@@ -72,23 +54,15 @@ def dafny_verifier() -> Scorer:
                 timeout=30,
             )
 
-            verification_time_sec = time.time() - start_time
-
             # Check for successful verification
             success = result.returncode == 0 and "0 errors" in result.stdout
 
-            # Determine error type if failed
-            error_type = (
-                "success"
-                if success
-                else categorize_error(result.stderr if result.stderr else result.stdout)
-            )
-
             # Prepare explanation
             if success:
-                explanation = f"Verification succeeded in {verification_time_sec:.2f}s"
+                explanation = "Verification succeeded"
             else:
                 error_output = result.stderr if result.stderr else result.stdout
+                error_type = categorize_error(error_output)
                 explanation = (
                     f"Verification failed ({error_type}):\n{error_output[:500]}"
                 )
@@ -97,16 +71,6 @@ def dafny_verifier() -> Scorer:
                 value="C" if success else "I",
                 answer=code,
                 explanation=explanation,
-                metadata={
-                    "verification_time": verification_time_sec,
-                    "error_type": error_type,
-                    "attempts": state.metadata.get("attempts", 1),
-                    "success_on_attempt": state.metadata.get("success_on_attempt"),
-                    "test_id": test_id,
-                    "test_file": state.metadata.get("test_file", ""),
-                    "dafny_stdout": result.stdout[:1000] if not success else "",
-                    "dafny_stderr": result.stderr[:1000] if not success else "",
-                },
             )
 
         except TimeoutError:
@@ -114,25 +78,12 @@ def dafny_verifier() -> Scorer:
                 value="I",
                 answer=code,
                 explanation="Verification timed out after 30 seconds",
-                metadata={
-                    "verification_time": 30.0,
-                    "error_type": "timeout",
-                    "attempts": state.metadata.get("attempts", 1),
-                    "test_id": test_id,
-                },
             )
         except Exception as e:
             return Score(
                 value="I",
                 answer=code,
                 explanation=f"Error during verification: {str(e)}",
-                metadata={
-                    "verification_time": time.time() - start_time,
-                    "error_type": "execution_error",
-                    "attempts": state.metadata.get("attempts", 1),
-                    "test_id": test_id,
-                    "error_message": str(e),
-                },
             )
 
     return score

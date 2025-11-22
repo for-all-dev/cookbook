@@ -1,14 +1,6 @@
-# EXAMPLE USAGE:
-#
-#   Refer for explanation to following link:
-#   https://lefthook.dev/configuration/
-#
 pre-push:
   jobs:
     - name: format
       run: uv run ruff format
-      stage_fixed: true
-
     - name: lint
       run: uv run ruff check --fix
-      stage_fixed: true
