@@ -87,15 +87,15 @@ for xm, ym, zm in zip(x_max, y_max, z_max):
     ax.text(xm, ym, zm, "◉", fontsize=32, ha='center', va='center')
 
 # Arrow along time at far right
-arrow_x0 = t_max
+arrow_x0 = t_max - 12.0  # Start further back so arrow extends to the right
 arrow_y0 = 0
 arrow_z0 = 0
 
 ax.quiver(
     arrow_x0, arrow_y0, arrow_z0,
     1.0, 0.0, 0.0,
-    length=8.0,
-    arrow_length_ratio=0.15,
+    length=16.0,
+    arrow_length_ratio=0.05,
     color='black'
 )
 
