@@ -10,11 +10,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-
-# Load emoji font by direct path
-emoji_font = fm.FontProperties(fname='/usr/share/fonts/noto/NotoColorEmoji.ttf')
 
 # Helix parameter
 t = np.linspace(0, 10 * np.pi, 800)
@@ -86,10 +82,10 @@ forall = "∀"
 for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
-# LLM toolcalls: robot emoji as text
+# LLM toolcalls: use a simple marker symbol instead of emoji
+# Since matplotlib can't handle color emoji fonts, use a circle marker
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    ax.text(xm, ym, zm, "🤖", fontsize=32, ha='center', va='center',
-            fontproperties=emoji_font)
+    ax.scatter(xm, ym, zm, marker='o', s=200, c='red', edgecolors='black', linewidths=2)
 
 # Arrow along time at far right
 arrow_x0 = t_max
