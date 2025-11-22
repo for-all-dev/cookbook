@@ -16,7 +16,6 @@ Requirements:
     - Install via: https://github.com/dafny-lang/dafny/releases
 """
 
-import re
 import time
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
@@ -25,115 +24,15 @@ from evals.dafnybench.inspect_ai.metrics import (
     error_type_distribution,
     verification_time,
 )
+from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
+from evals.dafnybench.inspect_ai.utils import categorize_error, extract_code
 
 from inspect_ai import Task, eval, task
 from inspect_ai.model import Model
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import TaskState, generate, system_message, use_tools
 from inspect_ai.util import sandbox
-
-# System prompt explaining Dafny verification with tool usage
-# Note: Double braces {{}} escape them in format strings
-DAFNY_SYSTEM_PROMPT = """You are an expert in formal verification using Dafny.
-
-Your task is to add verification hints to Dafny programs so they can be verified by the Dafny compiler.
-
-## Verification Hints You Need to Add
-
-1. **Loop Invariants** (`invariant`): Properties that hold before and after each loop iteration
-2. **Assertions** (`assert`): Claims about the program state at specific points
-3. **Preconditions** (`requires`): Conditions that must hold when a function is called
-4. **Postconditions** (`ensures`): Conditions guaranteed to hold when a function returns
-5. **Termination Measures** (`decreases`): Expressions that decrease on each recursive call or loop iteration
-
-## Using the verify_dafny Tool
-
-Once you've added verification hints, use the `verify_dafny` tool to check your work.
-Pass your complete Dafny program to the tool. If verification fails, analyze the error
-messages carefully and adjust your hints accordingly. Continue refining until verification succeeds.
-
-## Format
-
-You may discuss your reasoning, but ensure somewhere in your final output is triple backtick code block.
-
-### Example
-
-```dafny
-function factorial(n: nat): nat
-  requires n >= 0
-  decreases n
-{{
-  if n == 0 then 1 else n * factorial(n - 1)
-}}
-
-method FactorialIter(n: nat) returns (r: nat)
-  requires n >= 0
-  ensures r == factorial(n)
-{{
-  r := 1;
-  var i := 1;
-  while i <= n
-    invariant 1 <= i <= n + 1
-    invariant r == factorial(i - 1)
-  {{
-    r := r * i;
-    i := i + 1;
-  }}
-}}
-```
-"""
-
-
-def extract_code(completion: str) -> str:
-    """Extract Dafny code from model completion, removing markdown formatting.
-
-    Args:
-        completion: Raw model output potentially with markdown, explanations, etc.
-
-    Returns:
-        Cleaned Dafny code.
-    """
-    # Remove markdown code blocks
-    code_block_pattern = r"```(?:dafny)?\s*\n(.*?)```"
-    matches = re.findall(code_block_pattern, completion, re.DOTALL)
-
-    if matches:
-        # Use the last code block (model might explain then provide code)
-        return matches[-1].strip()
-
-    # If no markdown blocks, return the whole completion
-    return completion.strip()
-
-
-def categorize_error(stderr: str) -> str:
-    """Categorize Dafny verification errors into types.
-
-    Args:
-        stderr: Dafny error output.
-
-    Returns:
-        Error category string.
-    """
-    stderr_lower = stderr.lower()
-
-    # Check for specific error patterns
-    if "invariant" in stderr_lower:
-        return "invariant_violation"
-    elif "assertion" in stderr_lower or "assert" in stderr_lower:
-        return "assertion_failure"
-    elif "postcondition" in stderr_lower or "ensures" in stderr_lower:
-        return "postcondition_violation"
-    elif "precondition" in stderr_lower or "requires" in stderr_lower:
-        return "precondition_violation"
-    elif "decreases" in stderr_lower or "termination" in stderr_lower:
-        return "termination_failure"
-    elif "syntax error" in stderr_lower or "parse error" in stderr_lower:
-        return "syntax_error"
-    elif "resolution error" in stderr_lower or "type error" in stderr_lower:
-        return "type_error"
-    else:
-        return "other_error"
 
 
 @scorer(
