@@ -50,7 +50,6 @@ def dafny_verifier() -> Scorer:
         code = extract_code(state, strategy=strategy)
 
         # Generate unique temporary file path
-        # Sandbox manages the file lifecycle, so we just need a unique name
         temp_path = f"/tmp/dafny_score_{uuid.uuid4().hex}.dfy"
 
         try:
@@ -94,6 +93,12 @@ def dafny_verifier() -> Scorer:
                 answer=code,
                 explanation=f"Error during verification: {str(e)}",
             )
+        finally:
+            # Clean up temporary file
+            try:
+                await sandbox().exec(["rm", "-f", temp_path])
+            except Exception:
+                pass  # Ignore cleanup errors
 
     return score
 

@@ -32,13 +32,12 @@ def verify_dafny():
             )
 
         # Generate unique temporary file path
-        # Sandbox manages the file lifecycle, so we just need a unique name
         temp_path = f"/tmp/dafny_verify_{uuid.uuid4().hex}.dfy"
 
-        # Write code to temporary file
-        await sandbox().write_file(temp_path, code)
-
         try:
+            # Write code to temporary file
+            await sandbox().write_file(temp_path, code)
+
             # Run Dafny verification
             result = await sandbox().exec(
                 ["dafny", "verify", temp_path],
@@ -57,5 +56,11 @@ def verify_dafny():
             raise ToolError(
                 "Verification timed out after 30 seconds. The program may be too complex or contain infinite loops."
             )
+        finally:
+            # Clean up temporary file
+            try:
+                await sandbox().exec(["rm", "-f", temp_path])
+            except Exception:
+                pass  # Ignore cleanup errors
 
     return execute

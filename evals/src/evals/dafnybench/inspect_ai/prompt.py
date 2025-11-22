@@ -1,8 +1,5 @@
 """System prompt for DafnyBench verification task."""
 
-# System prompt explaining Dafny verification with tool usage
-# Note: Double braces {{}} escape them in format strings
-
 DAFNY_SYSTEM_PROMPT = """You are an expert in formal verification using Dafny.
 
 Your task is to add verification hints to Dafny programs so they can be verified by the Dafny compiler.
