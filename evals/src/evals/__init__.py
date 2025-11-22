@@ -6,6 +6,10 @@ import typer
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
 
+# Default configuration
+DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
+DEFAULT_LIMIT = 10
+
 app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
 
 # Create subcommand groups
@@ -23,17 +27,17 @@ def dafnybench_inspect(
         typer.Option(
             "--model",
             "-m",
-            help="Model to evaluate (default: anthropic/claude-sonnet-4-5)",
+            help=f"Model to evaluate (default: {DEFAULT_MODEL})",
         ),
-    ] = "anthropic/claude-sonnet-4-5",
+    ] = DEFAULT_MODEL,
     limit: Annotated[
         int,
         typer.Option(
             "--limit",
             "-l",
-            help="Limit number of samples to evaluate (default: 10, use -1 for all 782 samples)",
+            help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT}, use -1 for all 782 samples)",
         ),
-    ] = 10,
+    ] = DEFAULT_LIMIT,
 ) -> None:
     """Run DafnyBench evaluation using Inspect AI framework.
 
@@ -69,17 +73,17 @@ def dafnybench_raw(
         typer.Option(
             "--model",
             "-m",
-            help="Model to evaluate (default: anthropic/claude-sonnet-4-5)",
+            help=f"Model to evaluate (default: {DEFAULT_MODEL})",
         ),
-    ] = "anthropic/claude-sonnet-4-5",
+    ] = DEFAULT_MODEL,
     limit: Annotated[
         int,
         typer.Option(
             "--limit",
             "-l",
-            help="Limit number of samples to evaluate (default: 10, use -1 for all 782 samples)",
+            help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT}, use -1 for all 782 samples)",
         ),
-    ] = 10,
+    ] = DEFAULT_LIMIT,
 ) -> None:
     """Run DafnyBench evaluation using raw Anthropic SDK (no framework).
 
@@ -105,17 +109,17 @@ def fvapps_pydantic(
         typer.Option(
             "--model",
             "-m",
-            help="Model to evaluate (default: anthropic/claude-sonnet-4-5)",
+            help=f"Model to evaluate (default: {DEFAULT_MODEL})",
         ),
-    ] = "anthropic/claude-sonnet-4-5",
+    ] = DEFAULT_MODEL,
     limit: Annotated[
         int,
         typer.Option(
             "--limit",
             "-l",
-            help="Limit number of samples to evaluate",
+            help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT})",
         ),
-    ] = 10,
+    ] = DEFAULT_LIMIT,
 ) -> None:
     """Run FVAPPS (Lean) evaluation using Pydantic AI framework.
 
