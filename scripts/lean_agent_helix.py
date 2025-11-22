@@ -94,8 +94,8 @@ arrow_z0 = 0
 ax.quiver(
     arrow_x0, arrow_y0, arrow_z0,
     1.0, 0.0, 0.0,
-    length=5.0,
-    arrow_length_ratio=0.3,
+    length=8.0,
+    arrow_length_ratio=0.15,
     color='black'
 )
 
