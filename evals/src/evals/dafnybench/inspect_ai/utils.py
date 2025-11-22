@@ -1,9 +1,24 @@
 """Utility functions for DafnyBench evaluation."""
 
 import re
+from enum import Enum
 from typing import Union
 
 from inspect_ai.solver import TaskState
+
+
+class ExtractionStrategy(Enum):
+    """Code extraction strategy version.
+
+    V1: Buggy version - extracts from final completion text (last code block).
+        Problem: Celebratory messages after success can confuse extraction.
+
+    V2: Fixed version - backtracks through message history to find most recent
+        code block, skipping messages without code (e.g., celebrations).
+    """
+
+    V1 = "v1"
+    V2 = "v2"
 
 
 def extract_code_v1(completion: str) -> str:
@@ -67,25 +82,36 @@ def extract_code_v2(state: TaskState) -> str:
 
 
 def extract_code(
-    completion_or_state: Union[str, TaskState], strategy: str = "v1"
+    completion_or_state: Union[str, TaskState],
+    strategy: Union[ExtractionStrategy, str] = ExtractionStrategy.V1,
 ) -> str:
     """Extract Dafny code using the specified strategy.
 
     Args:
         completion_or_state: Either a completion string (for v1) or TaskState (for v2).
-        strategy: Extraction strategy - "v1" (buggy) or "v2" (fixed with backtracking).
+        strategy: Extraction strategy - ExtractionStrategy.V1 (buggy) or V2 (fixed).
+                  Also accepts "v1" or "v2" strings for convenience.
 
     Returns:
         Cleaned Dafny code.
     """
-    if strategy == "v1":
+    # Convert string to enum if needed
+    if isinstance(strategy, str):
+        try:
+            strategy = ExtractionStrategy(strategy)
+        except ValueError:
+            raise ValueError(
+                f"Unknown extraction strategy: {strategy}. Must be 'v1' or 'v2'"
+            )
+
+    if strategy == ExtractionStrategy.V1:
         # v1 requires a string
         if isinstance(completion_or_state, str):
             return extract_code_v1(completion_or_state)
         else:
             # If given TaskState, extract completion
             return extract_code_v1(completion_or_state.output.completion)
-    elif strategy == "v2":
+    elif strategy == ExtractionStrategy.V2:
         # v2 requires TaskState for message history
         if isinstance(completion_or_state, TaskState):
             return extract_code_v2(completion_or_state)

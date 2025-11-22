@@ -7,6 +7,7 @@ import typer
 from dotenv import load_dotenv
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
+from evals.dafnybench.inspect_ai.utils import ExtractionStrategy
 
 # Load environment variables from .env file
 # Check both project root and evals/ directory
@@ -76,10 +77,15 @@ def dafnybench_inspect(
         # Use different model
         uv run agent dafnybench inspect -m anthropic/claude-opus-4
     """
-    # Validate extraction strategy
+    # Validate and convert extraction strategy
     if extraction_strategy not in ["v1", "v2"]:
-        typer.echo(f"Error: extraction-strategy must be 'v1' or 'v2', got '{extraction_strategy}'", err=True)
+        typer.echo(
+            f"Error: extraction-strategy must be 'v1' or 'v2', got '{extraction_strategy}'",
+            err=True,
+        )
         raise typer.Exit(code=1)
+
+    strategy = ExtractionStrategy(extraction_strategy)
 
     # Convert limit=-1 to None (all samples)
     eval_limit = None if limit == -1 else limit
@@ -90,7 +96,7 @@ def dafnybench_inspect(
     run_dafnybench_eval(
         model=model,
         limit=eval_limit,
-        extraction_strategy=extraction_strategy,
+        extraction_strategy=strategy,
     )
 
 
