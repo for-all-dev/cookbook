@@ -1,6 +1,6 @@
 """Tools for DafnyBench evaluation."""
 
-import uuid
+import tempfile
 
 from inspect_ai.tool import ToolError, tool
 from inspect_ai.util import sandbox
@@ -31,36 +31,31 @@ def verify_dafny():
                 "You must properly verify the code with correct annotations."
             )
 
-        # Generate unique temporary file path
-        temp_path = f"/tmp/dafny_verify_{uuid.uuid4().hex}.dfy"
+        # Use context manager for automatic cleanup
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".dfy", delete=True) as tmp:
+            temp_path = tmp.name
 
-        try:
             # Write code to temporary file
             await sandbox().write_file(temp_path, code)
 
-            # Run Dafny verification
-            result = await sandbox().exec(
-                ["dafny", "verify", temp_path],
-                timeout=30,
-            )
-
-            # Check for successful verification
-            if result.returncode == 0 and "0 errors" in result.stdout:
-                return "✓ Verification succeeded! All checks passed."
-
-            # Return detailed error information for the agent to learn from
-            error_output = result.stderr if result.stderr else result.stdout
-            raise ToolError(f"Verification failed:\n\n{error_output}")
-
-        except TimeoutError:
-            raise ToolError(
-                "Verification timed out after 30 seconds. The program may be too complex or contain infinite loops."
-            )
-        finally:
-            # Clean up temporary file
             try:
-                await sandbox().exec(["rm", "-f", temp_path])
-            except Exception:
-                pass  # Ignore cleanup errors
+                # Run Dafny verification
+                result = await sandbox().exec(
+                    ["dafny", "verify", temp_path],
+                    timeout=30,
+                )
+
+                # Check for successful verification
+                if result.returncode == 0 and "0 errors" in result.stdout:
+                    return "✓ Verification succeeded! All checks passed."
+
+                # Return detailed error information for the agent to learn from
+                error_output = result.stderr if result.stderr else result.stdout
+                raise ToolError(f"Verification failed:\n\n{error_output}")
+
+            except TimeoutError:
+                raise ToolError(
+                    "Verification timed out after 30 seconds. The program may be too complex or contain infinite loops."
+                )
 
     return execute

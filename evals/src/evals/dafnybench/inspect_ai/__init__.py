@@ -16,7 +16,7 @@ Requirements:
     - Install via: https://github.com/dafny-lang/dafny/releases
 """
 
-import uuid
+import tempfile
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
@@ -49,56 +49,51 @@ def dafny_verifier() -> Scorer:
         # Extract code using the specified strategy
         code = extract_code(state, strategy=strategy)
 
-        # Generate unique temporary file path
-        temp_path = f"/tmp/dafny_score_{uuid.uuid4().hex}.dfy"
+        # Use context manager for automatic cleanup
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".dfy", delete=True) as tmp:
+            temp_path = tmp.name
 
-        try:
-            # Write code to temporary file
-            await sandbox().write_file(temp_path, code)
+            try:
+                # Write code to temporary file
+                await sandbox().write_file(temp_path, code)
 
-            # Run Dafny verification
-            result = await sandbox().exec(
-                ["dafny", "verify", temp_path],
-                timeout=30,
-            )
-
-            # Check for successful verification
-            success = result.returncode == 0 and "0 errors" in result.stdout
-
-            # Prepare explanation
-            if success:
-                explanation = "Verification succeeded"
-            else:
-                error_output = result.stderr if result.stderr else result.stdout
-                error_type = categorize_error(error_output)
-                explanation = (
-                    f"Verification failed ({error_type}):\n{error_output[:500]}"
+                # Run Dafny verification
+                result = await sandbox().exec(
+                    ["dafny", "verify", temp_path],
+                    timeout=30,
                 )
 
-            return Score(
-                value="C" if success else "I",
-                answer=code,
-                explanation=explanation,
-            )
+                # Check for successful verification
+                success = result.returncode == 0 and "0 errors" in result.stdout
 
-        except TimeoutError:
-            return Score(
-                value="I",
-                answer=code,
-                explanation="Verification timed out after 30 seconds",
-            )
-        except Exception as e:
-            return Score(
-                value="I",
-                answer=code,
-                explanation=f"Error during verification: {str(e)}",
-            )
-        finally:
-            # Clean up temporary file
-            try:
-                await sandbox().exec(["rm", "-f", temp_path])
-            except Exception:
-                pass  # Ignore cleanup errors
+                # Prepare explanation
+                if success:
+                    explanation = "Verification succeeded"
+                else:
+                    error_output = result.stderr if result.stderr else result.stdout
+                    error_type = categorize_error(error_output)
+                    explanation = (
+                        f"Verification failed ({error_type}):\n{error_output[:500]}"
+                    )
+
+                return Score(
+                    value="C" if success else "I",
+                    answer=code,
+                    explanation=explanation,
+                )
+
+            except TimeoutError:
+                return Score(
+                    value="I",
+                    answer=code,
+                    explanation="Verification timed out after 30 seconds",
+                )
+            except Exception as e:
+                return Score(
+                    value="I",
+                    answer=code,
+                    explanation=f"Error during verification: {str(e)}",
+                )
 
     return score
 
