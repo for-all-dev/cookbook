@@ -17,10 +17,7 @@ Requirements:
 """
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
-from evals.dafnybench.inspect_ai.prompt import (
-    DAFNY_SYSTEM_PROMPT_V1,
-    DAFNY_SYSTEM_PROMPT_V2,
-)
+from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 from evals.dafnybench.inspect_ai.utils import (
     ExtractionStrategy,
@@ -42,7 +39,7 @@ def dafny_verifier() -> Scorer:
     Executes Dafny locally and scores based on verification success.
     """
 
-    async def score(state: TaskState, target: Target) -> Score:
+    async def score(state: TaskState) -> Score:
         """Score the completion by verifying with Dafny."""
         # Get extraction strategy from metadata (default: v1)
         strategy = state.metadata.get("extraction_strategy", "v1")
@@ -139,17 +136,10 @@ def dafnybench(
     for sample in dataset:
         sample.metadata["extraction_strategy"] = extraction_strategy.value
 
-    # Choose prompt based on extraction strategy
-    system_prompt = (
-        DAFNY_SYSTEM_PROMPT_V2
-        if extraction_strategy == ExtractionStrategy.V2
-        else DAFNY_SYSTEM_PROMPT_V1
-    )
-
     return Task(
         dataset=dataset,
         solver=[
-            system_message(system_prompt),
+            system_message(DAFNY_SYSTEM_PROMPT),
             use_tools(verify_dafny()),
             generate(),  # Handles tool loop automatically
         ],
