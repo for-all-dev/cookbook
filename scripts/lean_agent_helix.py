@@ -79,15 +79,18 @@ z_min = b * np.cos(t_minima)
 
 # Lean toolcalls: ∀ on the helix
 forall = "∀"
-for xn, yn, zn in zip(x_min, y_min, z_min):
+for i, (xn, yn, zn) in enumerate(zip(x_min, y_min, z_min)):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
+    # Add checkmark next to the last forall
+    if i == len(x_min) - 1:
+        ax.text(xn + 1.5, yn, zn, "✓", fontsize=24, ha='left', va='center')
 
 # LLM toolcalls: use Unicode symbol since matplotlib can't handle color emoji fonts
 for xm, ym, zm in zip(x_max, y_max, z_max):
     ax.text(xm, ym, zm, "◉", fontsize=32, ha='center', va='center')
 
 # Arrow along time at far right
-arrow_x0 = t_max - 12.0  # Start further back so arrow extends to the right
+arrow_x0 = t_max - 24.0  # Start further back so arrow extends to the right
 arrow_y0 = 0
 arrow_z0 = 0
 
