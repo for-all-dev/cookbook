@@ -114,7 +114,19 @@ ax.set_zticklabels([])
 ax.set_zlabel("")
 
 # Set x-axis label to "time"
-ax.set_xlabel("time", fontsize=11)
+ax.set_xlabel("time→", fontsize=11)
+
+# Add legend
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
+legend_elements = [
+    Patch(facecolor='tab:orange', label='Error message'),
+    Patch(facecolor='tab:blue', label='LLM completion'),
+    Line2D([0], [0], marker='o', color='w', markerfacecolor='black', markersize=10, label='◉ LLM'),
+    Line2D([0], [0], marker='$∀$', color='w', markerfacecolor='black', markersize=12, label='∀ Proof checker')
+]
+ax.legend(handles=legend_elements, loc='upper left', fontsize=9)
 
 # Title
 ax.set_title("MVP of lean agent (its a loop)")
