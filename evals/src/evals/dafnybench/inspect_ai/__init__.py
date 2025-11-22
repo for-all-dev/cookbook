@@ -1,5 +1,4 @@
-"""
-DafnyBench evaluation using Inspect AI framework.
+"""DafnyBench evaluation using Inspect AI framework.
 
 This module implements an evaluation task for the DafnyBench dataset
 (wendy-sun/DafnyBench on Hugging Face), which tests language models'
@@ -20,20 +19,19 @@ Requirements:
 import re
 import time
 
-from inspect_ai import Task, task, eval
-from inspect_ai.model import Model
-from inspect_ai.scorer import Score, Target, accuracy, scorer, stderr, Scorer
-from inspect_ai.solver import TaskState, generate, system_message, use_tools
-from inspect_ai.util import sandbox
-
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
 from evals.dafnybench.inspect_ai.metrics import (
-    verification_time,
     avg_attempts,
     error_type_distribution,
+    verification_time,
 )
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 
+from inspect_ai import Task, eval, task
+from inspect_ai.model import Model
+from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
+from inspect_ai.solver import TaskState, generate, system_message, use_tools
+from inspect_ai.util import sandbox
 
 # System prompt explaining Dafny verification with tool usage
 # Note: Double braces {{}} escape them in format strings
@@ -88,8 +86,7 @@ method FactorialIter(n: nat) returns (r: nat)
 
 
 def extract_code(completion: str) -> str:
-    """
-    Extract Dafny code from model completion, removing markdown formatting.
+    """Extract Dafny code from model completion, removing markdown formatting.
 
     Args:
         completion: Raw model output potentially with markdown, explanations, etc.
@@ -110,8 +107,7 @@ def extract_code(completion: str) -> str:
 
 
 def categorize_error(stderr: str) -> str:
-    """
-    Categorize Dafny verification errors into types.
+    """Categorize Dafny verification errors into types.
 
     Args:
         stderr: Dafny error output.
@@ -150,17 +146,14 @@ def categorize_error(stderr: str) -> str:
     ]
 )
 def dafny_verifier() -> Scorer:
-    """
-    Score by running Dafny verification on the reconstructed program.
+    """Score by running Dafny verification on the reconstructed program.
 
     Executes Dafny locally and scores based on verification success.
     Tracks comprehensive metrics including time, attempts, and error types.
     """
 
     async def score(state: TaskState, target: Target) -> Score:
-        """
-        Score the completion by verifying with Dafny.
-        """
+        """Score the completion by verifying with Dafny."""
         start_time = time.time()
 
         # Extract code from completion
@@ -252,8 +245,7 @@ def dafnybench(
     sandbox: str = "local",
     limit: int | None = None,
 ) -> Task:
-    """
-    DafnyBench evaluation task.
+    """DafnyBench evaluation task.
 
     Evaluates language models on their ability to add verification hints
     to Dafny programs from the wendy-sun/DafnyBench dataset.
@@ -297,8 +289,7 @@ def run_dafnybench_eval(
     model: str | None = None,
     limit: int | None = None,
 ) -> None:
-    """
-    Run DafnyBench evaluation programmatically.
+    """Run DafnyBench evaluation programmatically.
 
     This function is called by the CLI and runs the evaluation using Inspect AI's eval() function.
     The agent naturally handles iteration using the verify_dafny tool.

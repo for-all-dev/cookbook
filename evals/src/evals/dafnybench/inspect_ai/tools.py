@@ -1,13 +1,12 @@
 """Tools for DafnyBench evaluation."""
 
-from inspect_ai.tool import tool, ToolError
+from inspect_ai.tool import ToolError, tool
 from inspect_ai.util import sandbox
 
 
 @tool
 def verify_dafny():
-    """
-    Tool that verifies Dafny code and returns verification results.
+    """Tool that verifies Dafny code and returns verification results.
 
     The agent calls this tool with generated code to check if verification succeeds.
     If verification fails, detailed error messages are returned for the agent to
@@ -15,8 +14,7 @@ def verify_dafny():
     """
 
     async def execute(code: str) -> str:
-        """
-        Verify Dafny code and return verification results.
+        """Verify Dafny code and return verification results.
 
         Args:
             code: Complete Dafny program with verification hints added.

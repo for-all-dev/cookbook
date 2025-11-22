@@ -1,12 +1,12 @@
 """Dataset loading for DafnyBench."""
 
 from datasets import load_dataset
+
 from inspect_ai.dataset import Sample
 
 
 def load_dafnybench_dataset() -> list[Sample]:
-    """
-    Load the DafnyBench dataset from Hugging Face.
+    """Load the DafnyBench dataset from Hugging Face.
 
     Returns:
         List of Sample objects with input (hints_removed code) and target (ground_truth code).

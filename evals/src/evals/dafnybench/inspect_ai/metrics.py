@@ -1,6 +1,6 @@
 """Custom metrics for DafnyBench evaluation."""
 
-from inspect_ai.scorer import Score, Metric, metric
+from inspect_ai.scorer import Metric, Score, metric
 
 
 @metric

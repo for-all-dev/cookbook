@@ -1,12 +1,10 @@
-"""
-Evals CLI for formal verification benchmarks.
-"""
+"""Evals CLI for formal verification benchmarks."""
+
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
-
 
 app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
 
@@ -42,11 +40,9 @@ def agent(
         ),
     ] = 10,
 ) -> None:
-    """
-    Run evaluation on a formal verification benchmark.
+    """Run evaluation on a formal verification benchmark.
 
     Examples:
-
         # Run DafnyBench with Inspect AI (default: Claude Sonnet 4.5, 10 samples)
         uv run agent dafnybench
 

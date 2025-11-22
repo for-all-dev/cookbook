@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 # Add legend
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -19,7 +20,7 @@ y = a * np.sin(t)
 z = b * np.cos(t)
 
 fig = plt.figure(figsize=(10, 6))
-ax = fig.add_subplot(111, projection='3d')
+ax = fig.add_subplot(111, projection="3d")
 
 # --- Build colored segments between extrema ---
 
@@ -27,8 +28,8 @@ t_min, t_max = t.min(), t.max()
 k_vals = np.arange(-10, 20)
 
 # Maxima at t = pi/2 + 2kπ (LLM), minima at t = 3pi/2 + 2kπ (Proof checker)
-t_maxima = np.pi/2 + 2 * np.pi * k_vals
-t_minima = 3*np.pi/2 + 2 * np.pi * k_vals
+t_maxima = np.pi / 2 + 2 * np.pi * k_vals
+t_minima = 3 * np.pi / 2 + 2 * np.pi * k_vals
 
 t_maxima = t_maxima[(t_maxima >= t_min) & (t_maxima <= t_max)]
 t_minima = t_minima[(t_minima >= t_min) & (t_minima <= t_max)]
@@ -47,12 +48,12 @@ color_llm_to_lean = "tab:blue"
 
 # Plot segments between successive extrema with two alternating colors
 for i in range(len(t_ext) - 1):
-    t_start, t_end = t_ext[i], t_ext[i+1]
+    t_start, t_end = t_ext[i], t_ext[i + 1]
     mask = (t >= t_start) & (t <= t_end)
-    if labels[i] == "min" and labels[i+1] == "max":
+    if labels[i] == "min" and labels[i + 1] == "max":
         # Proof checker -> LLM
         c = color_lean_to_llm
-    elif labels[i] == "max" and labels[i+1] == "min":
+    elif labels[i] == "max" and labels[i + 1] == "min":
         # LLM -> Proof checker
         c = color_llm_to_lean
     else:
@@ -74,16 +75,16 @@ z_min = b * np.cos(t_minima)
 # Proof checker toolcalls: ∀ on the helix
 forall = "∀"
 for i, (xn, yn, zn) in enumerate(zip(x_min, y_min, z_min)):
-    ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
+    ax.text(xn, yn, zn, forall, fontsize=16, ha="center", va="center")
     # Add checkmark next to the last forall, X for all others
     if i == len(x_min) - 1:
-        ax.text(xn + 1.5, yn, zn, "✓", fontsize=24, ha='left', va='center')
+        ax.text(xn + 1.5, yn, zn, "✓", fontsize=24, ha="left", va="center")
     else:
-        ax.text(xn + 1.5, yn, zn, "✗", fontsize=24, ha='left', va='center')
+        ax.text(xn + 1.5, yn, zn, "✗", fontsize=24, ha="left", va="center")
 
 # LLM toolcalls: use Unicode symbol since matplotlib can't handle color emoji fonts
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    ax.text(xm, ym, zm, "◉", fontsize=32, ha='center', va='center')
+    ax.text(xm, ym, zm, "◉", fontsize=32, ha="center", va="center")
 
 # Arrow along time at far right
 arrow_x0 = t_max - 24.0  # Start further back so arrow extends to the right
@@ -91,11 +92,15 @@ arrow_y0 = 0
 arrow_z0 = 0
 
 ax.quiver(
-    arrow_x0, arrow_y0, arrow_z0,
-    1.0, 0.0, 0.0,
+    arrow_x0,
+    arrow_y0,
+    arrow_z0,
+    1.0,
+    0.0,
+    0.0,
     length=16.0,
     arrow_length_ratio=0.05,
-    color='black'
+    color="black",
 )
 
 # Kill ticks and tick labels
@@ -111,12 +116,28 @@ ax.set_zlabel("")
 ax.set_xlabel("time→", fontsize=11)
 
 legend_elements = [
-    Patch(facecolor='tab:orange', label='Error message'),
-    Patch(facecolor='tab:blue', label='LLM completion'),
-    Line2D([0], [0], marker='$◉$', color='w', markerfacecolor='black', markersize=10, label='LLM API'),
-    Line2D([0], [0], marker='$∀$', color='w', markerfacecolor='black', markersize=12, label='Proof checker')
+    Patch(facecolor="tab:orange", label="Error message"),
+    Patch(facecolor="tab:blue", label="LLM completion"),
+    Line2D(
+        [0],
+        [0],
+        marker="$◉$",
+        color="w",
+        markerfacecolor="black",
+        markersize=10,
+        label="LLM API",
+    ),
+    Line2D(
+        [0],
+        [0],
+        marker="$∀$",
+        color="w",
+        markerfacecolor="black",
+        markersize=12,
+        label="Proof checker",
+    ),
 ]
-ax.legend(handles=legend_elements, loc='upper left', fontsize=9)
+ax.legend(handles=legend_elements, loc="upper left", fontsize=9)
 
 # Title
 ax.set_title("MVP a formal methods agent (it's a loop)")
@@ -125,5 +146,5 @@ plt.tight_layout()
 
 # Save to book static directory
 output_path = "./book/static/img/lean-agent-helix.png"
-plt.savefig(output_path, dpi=150, bbox_inches='tight')
+plt.savefig(output_path, dpi=150, bbox_inches="tight")
 print(f"Saved figure to {output_path}")
