@@ -32,7 +32,7 @@ ax = fig.add_subplot(111, projection='3d')
 t_min, t_max = t.min(), t.max()
 k_vals = np.arange(-10, 20)
 
-# Maxima at t = pi/2 + 2kπ (LLM), minima at t = 3pi/2 + 2kπ (Lean)
+# Maxima at t = pi/2 + 2kπ (LLM), minima at t = 3pi/2 + 2kπ (Proof checker)
 t_maxima = np.pi/2 + 2 * np.pi * k_vals
 t_minima = 3*np.pi/2 + 2 * np.pi * k_vals
 
@@ -56,10 +56,10 @@ for i in range(len(t_ext) - 1):
     t_start, t_end = t_ext[i], t_ext[i+1]
     mask = (t >= t_start) & (t <= t_end)
     if labels[i] == "min" and labels[i+1] == "max":
-        # Lean -> LLM
+        # Proof checker -> LLM
         c = color_lean_to_llm
     elif labels[i] == "max" and labels[i+1] == "min":
-        # LLM -> Lean
+        # LLM -> Proof checker
         c = color_llm_to_lean
     else:
         # Shouldn't really happen, but fall back to one color
@@ -68,7 +68,7 @@ for i in range(len(t_ext) - 1):
 
 # --- Mark extrema ---
 
-# Coordinates for maxima (LLM) and minima (Lean)
+# Coordinates for maxima (LLM) and minima (Proof checker)
 x_max = t_maxima
 y_max = a * np.sin(t_maxima)
 z_max = b * np.cos(t_maxima)
@@ -77,7 +77,7 @@ x_min = t_minima
 y_min = a * np.sin(t_minima)
 z_min = b * np.cos(t_minima)
 
-# Lean toolcalls: ∀ on the helix
+# Proof checker toolcalls: ∀ on the helix
 forall = "∀"
 for i, (xn, yn, zn) in enumerate(zip(x_min, y_min, z_min)):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
@@ -129,7 +129,7 @@ legend_elements = [
 ax.legend(handles=legend_elements, loc='upper left', fontsize=9)
 
 # Title
-ax.set_title("MVP of lean agent (its a loop)")
+ax.set_title("MVP of proof checker agent (it's a loop)")
 
 plt.tight_layout()
 
