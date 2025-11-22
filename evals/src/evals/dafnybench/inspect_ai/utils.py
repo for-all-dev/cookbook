@@ -6,6 +6,9 @@ from typing import Union
 
 from inspect_ai.solver import TaskState
 
+# Regex pattern for matching Dafny code blocks in markdown
+CODE_BLOCK_PATTERN = r"```(?:dafny)?\s*\n(.*?)```"
+
 
 class ExtractionStrategy(Enum):
     """Code extraction strategy version.
@@ -34,9 +37,7 @@ def extract_code_v1(completion: str) -> str:
     Returns:
         Cleaned Dafny code.
     """
-    # Remove markdown code blocks
-    code_block_pattern = r"```(?:dafny)?\s*\n(.*?)```"
-    matches = re.findall(code_block_pattern, completion, re.DOTALL)
+    matches = re.findall(CODE_BLOCK_PATTERN, completion, re.DOTALL)
 
     if matches:
         # Use the last code block (model might explain then provide code)
@@ -59,8 +60,6 @@ def extract_code_v2(state: TaskState) -> str:
     Returns:
         Cleaned Dafny code.
     """
-    code_block_pattern = r"```(?:dafny)?\s*\n(.*?)```"
-
     # Walk backwards through assistant messages
     for message in reversed(state.messages):
         # Only look at assistant messages
@@ -71,7 +70,7 @@ def extract_code_v2(state: TaskState) -> str:
         content = message.text if hasattr(message, "text") else str(message.content)
 
         # Try to extract code from this message
-        matches = re.findall(code_block_pattern, content, re.DOTALL)
+        matches = re.findall(CODE_BLOCK_PATTERN, content, re.DOTALL)
 
         if matches:
             # Found code! Return the last code block from this message
