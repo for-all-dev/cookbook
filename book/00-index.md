@@ -24,6 +24,13 @@ Agents, evals, and RL environments for the working proof engineer.
 
 [Get Started](/introduction/ch0)
 
+```{figure} ./static/img/lean-agent-helix.png
+:name: lean-agent-helix
+:width: 80%
+
+MVP of lean agent: the loop between LLM (◉) and Lean verification (∀)
+```
+
 +++ {"kind": "left"}
 
 ## Table of contents at a glance (PLANNED)
