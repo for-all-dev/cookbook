@@ -1,7 +1,6 @@
 """Dataset loading for DafnyBench."""
 
 from datasets import load_dataset
-
 from inspect_ai.dataset import Sample
 
 
@@ -16,7 +15,6 @@ def load_dafnybench_dataset() -> list[Sample]:
     samples = [
         Sample(
             input=f"Add verification hints to this Dafny code:\n\n{row['hints_removed']}",
-            target=row["ground_truth"],
             metadata={
                 "test_id": row["test_ID"],
                 "test_file": row["test_file"],

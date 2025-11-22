@@ -10,13 +10,16 @@ from evals.dafnybench.inspect_ai import run_dafnybench_eval
 
 # Load environment variables from .env file
 # Check both project root and evals/ directory
-for env_path in [Path(".env"), Path("evals/.env")]:
+DOTENV = Path(".env")
+for env_path in [DOTENV, Path("evals") / DOTENV, Path("../") / DOTENV]:
     if env_path.exists():
         load_dotenv(env_path)
         break
 
 # Default configuration
-DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
+SONNET = "anthropic/claude-sonnet-4-5"
+HAIKU = "anthropic/claude-haiku-4-5"
+DEFAULT_MODEL = SONNET
 DEFAULT_LIMIT = 10
 
 app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
@@ -36,9 +39,9 @@ def dafnybench_inspect(
         typer.Option(
             "--model",
             "-m",
-            help=f"Model to evaluate (default: {DEFAULT_MODEL})",
+            help=f"Model to evaluate (default: {HAIKU})",
         ),
-    ] = DEFAULT_MODEL,
+    ] = HAIKU,
     limit: Annotated[
         int,
         typer.Option(

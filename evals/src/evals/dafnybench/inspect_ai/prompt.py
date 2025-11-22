@@ -20,11 +20,13 @@ Once you've added verification hints, use the `verify_dafny` tool to check your 
 Pass your complete Dafny program to the tool. If verification fails, analyze the error
 messages carefully and adjust your hints accordingly. Continue refining until verification succeeds.
 
+If the verification succeeds, exit the conversation.
+
 ## Format
 
 You may discuss your reasoning, but ensure somewhere in your final output is triple backtick code block.
 
-### Example
+### Example Dafny syntax
 
 ```dafny
 function factorial(n: nat): nat
