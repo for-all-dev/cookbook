@@ -16,6 +16,8 @@ Requirements:
     - Install via: https://github.com/dafny-lang/dafny/releases
 """
 
+import tempfile
+
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
@@ -47,17 +49,19 @@ def dafny_verifier() -> Scorer:
         # Extract code using the specified strategy
         code = extract_code(state, strategy=strategy)
 
-        # Get test ID for unique file naming
-        test_id = state.metadata.get("test_id", "unknown")
-        test_file = f"/tmp/dafny_eval_{test_id}.dfy"
+        # Create temporary file with proper cleanup
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".dfy", delete=False
+        ) as tmp:
+            temp_path = tmp.name
 
         try:
             # Write code to temporary file
-            await sandbox().write_file(test_file, code)
+            await sandbox().write_file(temp_path, code)
 
             # Run Dafny verification
             result = await sandbox().exec(
-                ["dafny", "verify", test_file],
+                ["dafny", "verify", temp_path],
                 timeout=30,
             )
 
