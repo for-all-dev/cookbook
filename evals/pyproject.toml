@@ -14,6 +14,7 @@ dependencies = [
     "inspect-ai>=0.3.146",
     "typer>=0.20.0",
     "anthropic>=0.73.0",
+    "python-dotenv>=1.2.1",
 ]
 
 [project.scripts]

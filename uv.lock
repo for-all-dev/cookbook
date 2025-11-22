@@ -846,6 +846,7 @@ dependencies = [
     { name = "inspect-ai" },
     { name = "pydantic" },
     { name = "pydantic-ai" },
+    { name = "python-dotenv" },
     { name = "typer" },
 ]
 
@@ -856,6 +857,7 @@ requires-dist = [
     { name = "inspect-ai", specifier = ">=0.3.146" },
     { name = "pydantic", specifier = ">=2.12.4" },
     { name = "pydantic-ai", specifier = ">=1.19.0" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "typer", specifier = ">=0.20.0" },
 ]
 

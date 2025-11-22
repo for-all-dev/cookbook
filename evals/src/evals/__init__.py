@@ -1,10 +1,19 @@
 """Evals CLI for formal verification benchmarks."""
 
+from pathlib import Path
 from typing import Annotated
 
 import typer
+from dotenv import load_dotenv
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
+
+# Load environment variables from .env file
+# Check both project root and evals/ directory
+for env_path in [Path(".env"), Path("evals/.env")]:
+    if env_path.exists():
+        load_dotenv(env_path)
+        break
 
 # Default configuration
 DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
