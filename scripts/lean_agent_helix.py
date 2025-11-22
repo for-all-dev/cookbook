@@ -81,9 +81,11 @@ z_min = b * np.cos(t_minima)
 forall = "∀"
 for i, (xn, yn, zn) in enumerate(zip(x_min, y_min, z_min)):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
-    # Add checkmark next to the last forall
+    # Add checkmark next to the last forall, X for all others
     if i == len(x_min) - 1:
         ax.text(xn + 1.5, yn, zn, "✓", fontsize=24, ha='left', va='center')
+    else:
+        ax.text(xn + 1.5, yn, zn, "✗", fontsize=24, ha='left', va='center')
 
 # LLM toolcalls: use Unicode symbol since matplotlib can't handle color emoji fonts
 for xm, ym, zm in zip(x_max, y_max, z_max):
