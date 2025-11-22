@@ -1,5 +1,7 @@
 """Tools for DafnyBench evaluation."""
 
+import tempfile
+
 from inspect_ai.tool import ToolError, tool
 from inspect_ai.util import sandbox
 
@@ -30,7 +32,7 @@ def verify_dafny():
             )
 
         # Write code to temporary file
-        temp_file = "/tmp/dafny_verify.dfy"
+        temp_file = f"{tempfile.gettempdir()}/dafny_verify.dfy"
         await sandbox().write_file(temp_file, code)
 
         try:
