@@ -14,7 +14,7 @@ project:
     - title: Introduction
       children:
         - pattern: 01-introduction/*.md
-    - title: Dafny
+    - title: "Dafny part 1: with a framework"
       children:
         - pattern: 02-dafny-and-inspect/*.md
     - title: "Dafny part 2: no framework"
