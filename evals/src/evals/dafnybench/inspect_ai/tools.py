@@ -32,9 +32,7 @@ def verify_dafny():
             )
 
         # Create temporary file with proper cleanup
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".dfy", delete=False
-        ) as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".dfy", delete=False) as tmp:
             temp_path = tmp.name
 
         # Write code to temporary file

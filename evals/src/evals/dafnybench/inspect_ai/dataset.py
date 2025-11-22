@@ -1,6 +1,7 @@
 """Dataset loading for DafnyBench."""
 
 from datasets import load_dataset
+
 from inspect_ai.dataset import Sample
 
 

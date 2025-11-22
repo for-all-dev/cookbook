@@ -2,7 +2,6 @@
 
 import re
 from enum import Enum
-from typing import Union
 
 from inspect_ai.solver import TaskState
 
@@ -81,8 +80,8 @@ def extract_code_v2(state: TaskState) -> str:
 
 
 def extract_code(
-    completion_or_state: Union[str, TaskState],
-    strategy: Union[ExtractionStrategy, str] = ExtractionStrategy.V1,
+    completion_or_state: str | TaskState,
+    strategy: ExtractionStrategy | str = ExtractionStrategy.V1,
 ) -> str:
     """Extract Dafny code using the specified strategy.
 
