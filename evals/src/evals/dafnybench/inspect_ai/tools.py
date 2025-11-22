@@ -31,14 +31,19 @@ def verify_dafny():
                 "You must properly verify the code with correct annotations."
             )
 
+        # Create temporary file with proper cleanup
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".dfy", delete=False
+        ) as tmp:
+            temp_path = tmp.name
+
         # Write code to temporary file
-        temp_file = f"{tempfile.gettempdir()}/dafny_verify.dfy"
-        await sandbox().write_file(temp_file, code)
+        await sandbox().write_file(temp_path, code)
 
         try:
             # Run Dafny verification
             result = await sandbox().exec(
-                ["dafny", "verify", temp_file],
+                ["dafny", "verify", temp_path],
                 timeout=30,
             )
 
