@@ -17,7 +17,10 @@ Requirements:
 """
 
 from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
-from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
+from evals.dafnybench.inspect_ai.prompt import (
+    DAFNY_SYSTEM_PROMPT_V1,
+    DAFNY_SYSTEM_PROMPT_V2,
+)
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 from evals.dafnybench.inspect_ai.utils import categorize_error, extract_code
 
@@ -37,8 +40,11 @@ def dafny_verifier() -> Scorer:
 
     async def score(state: TaskState, target: Target) -> Score:
         """Score the completion by verifying with Dafny."""
-        # Extract code from completion
-        code = extract_code(state.output.completion)
+        # Get extraction strategy from metadata (default: v1)
+        strategy = state.metadata.get("extraction_strategy", "v1")
+
+        # Extract code using the specified strategy
+        code = extract_code(state, strategy=strategy)
 
         # Get test ID for unique file naming
         test_id = state.metadata.get("test_id", "unknown")
@@ -94,6 +100,7 @@ def dafnybench(
     model: str | Model | None = None,
     sandbox: str = "local",
     limit: int | None = None,
+    extraction_strategy: str = "v1",
 ) -> Task:
     """DafnyBench evaluation task.
 
@@ -108,6 +115,7 @@ def dafnybench(
         model: Model to evaluate (default: from INSPECT_EVAL_MODEL env var).
         sandbox: Sandbox type - use "local" if Dafny is installed locally (default: "local").
         limit: Limit number of samples to evaluate (default: all 782 samples).
+        extraction_strategy: Code extraction strategy - "v1" (buggy) or "v2" (fixed). Default: "v1".
 
     Returns:
         Task configured for DafnyBench evaluation.
@@ -123,10 +131,19 @@ def dafnybench(
     if limit is not None:
         dataset = dataset[:limit]
 
+    # Add extraction strategy to each sample's metadata
+    for sample in dataset:
+        sample.metadata["extraction_strategy"] = extraction_strategy
+
+    # Choose prompt based on extraction strategy
+    system_prompt = (
+        DAFNY_SYSTEM_PROMPT_V2 if extraction_strategy == "v2" else DAFNY_SYSTEM_PROMPT_V1
+    )
+
     return Task(
         dataset=dataset,
         solver=[
-            system_message(DAFNY_SYSTEM_PROMPT),
+            system_message(system_prompt),
             use_tools(verify_dafny()),
             generate(),  # Handles tool loop automatically
         ],
@@ -138,6 +155,7 @@ def dafnybench(
 def run_dafnybench_eval(
     model: str | None = None,
     limit: int | None = None,
+    extraction_strategy: str = "v1",
 ) -> None:
     """Run DafnyBench evaluation programmatically.
 
@@ -147,10 +165,12 @@ def run_dafnybench_eval(
     Args:
         model: Model to evaluate (uses INSPECT_EVAL_MODEL env var if None).
         limit: Limit number of samples to evaluate (None = all samples).
+        extraction_strategy: Code extraction strategy - "v1" (buggy) or "v2" (fixed). Default: "v1".
     """
     task_obj = dafnybench(
         model=model,
         limit=limit,
+        extraction_strategy=extraction_strategy,
     )
 
     # Run the evaluation

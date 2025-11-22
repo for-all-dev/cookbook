@@ -50,12 +50,22 @@ def dafnybench_inspect(
             help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT}, use -1 for all 782 samples)",
         ),
     ] = DEFAULT_LIMIT,
+    extraction_strategy: Annotated[
+        str,
+        typer.Option(
+            "--extraction-strategy",
+            help="Code extraction strategy: 'v1' (buggy - extracts from final completion) or 'v2' (fixed - backtracks through message history)",
+        ),
+    ] = "v1",
 ) -> None:
     """Run DafnyBench evaluation using Inspect AI framework.
 
     Examples:
-        # Run with defaults (Claude Sonnet 4.5, 10 samples)
+        # Run with defaults (Claude Haiku 4.5, 10 samples, v1 extraction)
         uv run agent dafnybench inspect
+
+        # Run with v2 extraction strategy (fixed)
+        uv run agent dafnybench inspect --extraction-strategy v2
 
         # Run with all 782 samples
         uv run agent dafnybench inspect --limit -1
@@ -66,15 +76,21 @@ def dafnybench_inspect(
         # Use different model
         uv run agent dafnybench inspect -m anthropic/claude-opus-4
     """
+    # Validate extraction strategy
+    if extraction_strategy not in ["v1", "v2"]:
+        typer.echo(f"Error: extraction-strategy must be 'v1' or 'v2', got '{extraction_strategy}'", err=True)
+        raise typer.Exit(code=1)
+
     # Convert limit=-1 to None (all samples)
     eval_limit = None if limit == -1 else limit
 
     typer.echo(
-        f"Running DafnyBench with Inspect AI (limit={limit if limit != -1 else 'all'})..."
+        f"Running DafnyBench with Inspect AI (limit={limit if limit != -1 else 'all'}, strategy={extraction_strategy})..."
     )
     run_dafnybench_eval(
         model=model,
         limit=eval_limit,
+        extraction_strategy=extraction_strategy,
     )
 
 
