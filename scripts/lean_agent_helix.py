@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Generate helix visualization of LLM-verifier interaction loop."""
 
 import matplotlib.pyplot as plt
 import numpy as np
