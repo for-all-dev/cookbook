@@ -1,0 +1,12 @@
+[project]
+name = "scripts"
+version = "0.1.0"
+description = "Utility scripts for the Formal Verification Agent Recipes cookbook"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "pillow>=12.0.0",
+    "numpy>=2.3.5",
+    "fonttools>=4.60.1",
+]

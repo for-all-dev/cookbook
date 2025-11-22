@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# /// script
-# dependencies = [
-#   "matplotlib",
-#   "pillow",
-#   "numpy",
-#   "fonttools",
-# ]
-# ///
 
 import numpy as np
 import matplotlib.pyplot as plt
