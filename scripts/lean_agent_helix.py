@@ -82,10 +82,9 @@ forall = "∀"
 for xn, yn, zn in zip(x_min, y_min, z_min):
     ax.text(xn, yn, zn, forall, fontsize=16, ha='center', va='center')
 
-# LLM toolcalls: use a simple marker symbol instead of emoji
-# Since matplotlib can't handle color emoji fonts, use a circle marker
+# LLM toolcalls: use Unicode symbol since matplotlib can't handle color emoji fonts
 for xm, ym, zm in zip(x_max, y_max, z_max):
-    ax.scatter(xm, ym, zm, marker='o', s=200, c='red', edgecolors='black', linewidths=2)
+    ax.text(xm, ym, zm, "◉", fontsize=32, ha='center', va='center')
 
 # Arrow along time at far right
 arrow_x0 = t_max
