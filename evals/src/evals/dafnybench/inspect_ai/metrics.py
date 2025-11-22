@@ -20,7 +20,7 @@ def verification_time() -> Metric:
 
 @metric
 def avg_attempts() -> Metric:
-    """Metric to track average number of attempts per sample."""
+    """Metric to track average number of attempts across all samples."""
 
     def metric_fn(scores: list[Score]) -> float:
         attempts = [
