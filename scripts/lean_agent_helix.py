@@ -141,7 +141,7 @@ legend_elements = [
 ax.legend(handles=legend_elements, loc="upper left", fontsize=9)
 
 # Title
-ax.set_title("MVP a formal methods agent (it's a loop)")
+ax.set_title("MVP a formal methods agent (it's a loop with extra steps)")
 
 plt.tight_layout()
 
