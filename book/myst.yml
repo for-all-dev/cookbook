@@ -34,4 +34,4 @@ site:
   options:
     folders: true
     favicon: ./static/img/forall.ico
-    logo: ./static/img/forall.svg
+    logo: ./static/img/workspace-banner-4.png
