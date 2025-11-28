@@ -25,7 +25,7 @@ Agents, evals, and RL environments for the working proof engineer.
 [Get Started](/introduction/ch0)
 
 ```{figure} ./static/img/agent-helix.png
-:name: agent-helix
+:name: agent-helix-index
 :width: 60%
 
 MVP: the loop between LLM (◉) and a verifier (∀)
