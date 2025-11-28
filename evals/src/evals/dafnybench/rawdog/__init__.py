@@ -9,7 +9,7 @@ and iteration control that frameworks handle automatically.
 
 import logging
 
-from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
+from evals.dafnybench.common.dataset import load_dafnybench_dataset
 from evals.dafnybench.rawdog.agent import run_agent
 from evals.dafnybench.rawdog.metrics import aggregate_results
 from evals.dafnybench.rawdog.types import EvalSample, setup_logging

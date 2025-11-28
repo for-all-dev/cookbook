@@ -18,7 +18,7 @@ Requirements:
 
 import tempfile
 
-from evals.dafnybench.inspect_ai.dataset import load_dafnybench_dataset
+from evals.dafnybench.common.dataset import load_dafnybench_dataset
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 from evals.dafnybench.inspect_ai.utils import (
