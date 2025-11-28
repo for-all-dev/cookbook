@@ -26,3 +26,4 @@ wheels/
 
 # inspect and other logs
 logs/
+artifacts/
