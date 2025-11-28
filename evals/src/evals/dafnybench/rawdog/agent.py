@@ -7,7 +7,6 @@ implementing the tool-calling loop manually with the Anthropic SDK.
 import logging
 
 import anthropic
-
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.utils import categorize_error
 from evals.dafnybench.rawdog.tools import verify_dafny
@@ -122,7 +121,9 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
                     last_code = code  # Track for final extraction
 
                     # Log and save artifact
-                    logger.info(f"Attempt {attempts}: Verifying code ({len(code)} chars)")
+                    logger.info(
+                        f"Attempt {attempts}: Verifying code ({len(code)} chars)"
+                    )
                     save_artifact(sample.test_id, attempts, code)
 
                     # Execute tool
@@ -145,7 +146,9 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
 
                     else:
                         # Verification failed - return error for agent to retry
-                        logger.debug(f"Verification failed: {result['message'][:100]}...")
+                        logger.debug(
+                            f"Verification failed: {result['message'][:100]}..."
+                        )
                         tool_results.append(
                             {
                                 "type": "tool_result",
