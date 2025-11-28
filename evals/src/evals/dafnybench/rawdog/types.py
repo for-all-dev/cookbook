@@ -1,13 +1,13 @@
 """Type definitions and utilities for rawdog DafnyBench implementation."""
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel
 
-
-class EvalSample(BaseModel):
+@dataclass
+class EvalSample:
     """Single evaluation sample from DafnyBench dataset."""
 
     test_id: str
@@ -16,7 +16,8 @@ class EvalSample(BaseModel):
     ground_truth: str  # Expected correct code
 
 
-class AgentResult(BaseModel):
+@dataclass
+class AgentResult:
     """Result for a single sample evaluation."""
 
     sample_id: str
@@ -26,7 +27,8 @@ class AgentResult(BaseModel):
     error_type: str | None  # Only if not success
 
 
-class EvalMetrics(BaseModel):
+@dataclass
+class EvalMetrics:
     """Aggregated metrics across all samples."""
 
     total_samples: int
