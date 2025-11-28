@@ -2,14 +2,25 @@
 
 This module demonstrates what inspect-ai's generate() abstracts away by
 implementing the tool-calling loop manually with the Anthropic SDK.
+
+This version uses specialized insertion tools instead of having the agent
+regenerate complete files.
 """
 
 import logging
 
 import anthropic
-from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.utils import categorize_error
-from evals.dafnybench.rawdog.tools import verify_dafny
+from evals.dafnybench.rawdog.prompt import RAWDOG_SYSTEM_PROMPT
+from evals.dafnybench.rawdog.tools import (
+    get_code_state,
+    insert_assertion,
+    insert_invariant,
+    insert_measure,
+    insert_postcondition,
+    insert_precondition,
+    verify_dafny,
+)
 from evals.dafnybench.rawdog.types import AgentResult, EvalSample, save_artifact
 
 
@@ -22,6 +33,9 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
     - Anthropic API integration with tools
     - Tool execution and result handling
     - Iteration control and stopping conditions
+
+    This version uses specialized insertion tools for targeted hint placement
+    instead of having the agent regenerate complete Dafny files.
 
     Args:
         sample: Evaluation sample with code to verify
@@ -38,38 +52,168 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
     if model.startswith("anthropic/"):
         model = model.replace("anthropic/", "")
 
-    # Initialize message history
-    messages = [{"role": "user", "content": sample.input}]
+    # Initialize message history with code state
+    initial_state = f"""=== CURRENT_CODE_STATE ===
+
+```dafny
+{sample.hints_removed}
+```
+
+Above is the initial unhinted code. Use insertion tools to add verification hints."""
+
+    messages = [
+        {"role": "user", "content": sample.input},
+        {"role": "user", "content": initial_state},
+    ]
 
     # Track metrics
     attempts = 0
     success = False
     final_code = None
     error_type = None
-    last_code = None  # Track last code passed to tool
 
     # Setup logging for this sample
     logger = logging.getLogger(__name__)
     logger.info(f"Starting evaluation for sample {sample.test_id}")
 
-    # Tool definition (Anthropic API format)
+    # Tool definitions (Anthropic API format)
     tools = [
         {
-            "name": "verify_dafny",
-            "description": "Verify Dafny code and return verification results. "
-            "Pass your complete Dafny program to check if verification succeeds. "
-            "If verification fails, detailed error messages are returned for analysis and retry.",
+            "name": "insert_invariant",
+            "description": "Insert a loop invariant at specified location",
             "input_schema": {
                 "type": "object",
                 "properties": {
-                    "code": {
+                    "invariant": {
                         "type": "string",
-                        "description": "Complete Dafny program with verification hints added",
-                    }
+                        "description": "Invariant expression",
+                    },
+                    "line_number": {
+                        "type": "integer",
+                        "description": "Line number (1-indexed, optional)",
+                    },
+                    "context_before": {
+                        "type": "string",
+                        "description": "Line before insertion point (optional)",
+                    },
+                    "context_after": {
+                        "type": "string",
+                        "description": "Line after insertion point (optional)",
+                    },
                 },
-                "required": ["code"],
+                "required": ["invariant"],
             },
-        }
+        },
+        {
+            "name": "insert_assertion",
+            "description": "Insert an assertion at specified location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "assertion": {
+                        "type": "string",
+                        "description": "Assertion expression",
+                    },
+                    "line_number": {
+                        "type": "integer",
+                        "description": "Line number (1-indexed, optional)",
+                    },
+                    "context_before": {
+                        "type": "string",
+                        "description": "Line before insertion point (optional)",
+                    },
+                    "context_after": {
+                        "type": "string",
+                        "description": "Line after insertion point (optional)",
+                    },
+                },
+                "required": ["assertion"],
+            },
+        },
+        {
+            "name": "insert_precondition",
+            "description": "Insert a function precondition (requires clause) at specified location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "precondition": {
+                        "type": "string",
+                        "description": "Precondition expression",
+                    },
+                    "line_number": {
+                        "type": "integer",
+                        "description": "Line number (1-indexed, optional)",
+                    },
+                    "context_before": {
+                        "type": "string",
+                        "description": "Line before insertion point (optional)",
+                    },
+                    "context_after": {
+                        "type": "string",
+                        "description": "Line after insertion point (optional)",
+                    },
+                },
+                "required": ["precondition"],
+            },
+        },
+        {
+            "name": "insert_postcondition",
+            "description": "Insert a function postcondition (ensures clause) at specified location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "postcondition": {
+                        "type": "string",
+                        "description": "Postcondition expression",
+                    },
+                    "line_number": {
+                        "type": "integer",
+                        "description": "Line number (1-indexed, optional)",
+                    },
+                    "context_before": {
+                        "type": "string",
+                        "description": "Line before insertion point (optional)",
+                    },
+                    "context_after": {
+                        "type": "string",
+                        "description": "Line after insertion point (optional)",
+                    },
+                },
+                "required": ["postcondition"],
+            },
+        },
+        {
+            "name": "insert_measure",
+            "description": "Insert a termination measure (decreases clause) at specified location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "measure": {"type": "string", "description": "Decreases expression"},
+                    "line_number": {
+                        "type": "integer",
+                        "description": "Line number (1-indexed, optional)",
+                    },
+                    "context_before": {
+                        "type": "string",
+                        "description": "Line before insertion point (optional)",
+                    },
+                    "context_after": {
+                        "type": "string",
+                        "description": "Line after insertion point (optional)",
+                    },
+                },
+                "required": ["measure"],
+            },
+        },
+        {
+            "name": "verify_dafny",
+            "description": "Verify the current code state with all hints inserted so far. "
+            "Returns verification results and full rendered code.",
+            "input_schema": {
+                "type": "object",
+                "properties": {},  # No parameters - reads from state
+            },
+        },
     ]
 
     # Manual iteration loop - this is what generate() does automatically!
@@ -81,7 +225,7 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
             response = client.messages.create(
                 model=model,
                 max_tokens=8192,  # Increased to handle longer responses
-                system=DAFNY_SYSTEM_PROMPT,
+                system=RAWDOG_SYSTEM_PROMPT,
                 messages=messages,
                 tools=tools,
             )
@@ -97,9 +241,6 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
         if response.stop_reason == "end_turn":
             # No tool use - agent finished without calling tool
             logger.info("Agent ended turn without tool use")
-            # Use last_code if we have it
-            if last_code:
-                final_code = last_code
             break
 
         if response.stop_reason != "tool_use":
@@ -115,27 +256,115 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
                 tool_input = content_block.input
                 tool_use_id = content_block.id
 
-                if tool_name == "verify_dafny":
-                    attempts += 1
-                    code = tool_input["code"]
-                    last_code = code  # Track for final extraction
-
-                    # Log and save artifact
-                    logger.info(
-                        f"Attempt {attempts}: Verifying code ({len(code)} chars)"
+                # Route to appropriate tool
+                if tool_name == "insert_invariant":
+                    result = insert_invariant(
+                        messages,
+                        invariant=tool_input["invariant"],
+                        line_number=tool_input.get("line_number"),
+                        context_before=tool_input.get("context_before"),
+                        context_after=tool_input.get("context_after"),
                     )
-                    save_artifact(sample.test_id, attempts, code)
+                    logger.info(f"Insert invariant: {result['message']}")
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": result["message"],
+                            "is_error": not result["success"],
+                        }
+                    )
 
-                    # Execute tool
-                    result = verify_dafny(code)
+                elif tool_name == "insert_assertion":
+                    result = insert_assertion(
+                        messages,
+                        assertion=tool_input["assertion"],
+                        line_number=tool_input.get("line_number"),
+                        context_before=tool_input.get("context_before"),
+                        context_after=tool_input.get("context_after"),
+                    )
+                    logger.info(f"Insert assertion: {result['message']}")
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": result["message"],
+                            "is_error": not result["success"],
+                        }
+                    )
+
+                elif tool_name == "insert_precondition":
+                    result = insert_precondition(
+                        messages,
+                        precondition=tool_input["precondition"],
+                        line_number=tool_input.get("line_number"),
+                        context_before=tool_input.get("context_before"),
+                        context_after=tool_input.get("context_after"),
+                    )
+                    logger.info(f"Insert precondition: {result['message']}")
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": result["message"],
+                            "is_error": not result["success"],
+                        }
+                    )
+
+                elif tool_name == "insert_postcondition":
+                    result = insert_postcondition(
+                        messages,
+                        postcondition=tool_input["postcondition"],
+                        line_number=tool_input.get("line_number"),
+                        context_before=tool_input.get("context_before"),
+                        context_after=tool_input.get("context_after"),
+                    )
+                    logger.info(f"Insert postcondition: {result['message']}")
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": result["message"],
+                            "is_error": not result["success"],
+                        }
+                    )
+
+                elif tool_name == "insert_measure":
+                    result = insert_measure(
+                        messages,
+                        measure=tool_input["measure"],
+                        line_number=tool_input.get("line_number"),
+                        context_before=tool_input.get("context_before"),
+                        context_after=tool_input.get("context_after"),
+                    )
+                    logger.info(f"Insert measure: {result['message']}")
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": result["message"],
+                            "is_error": not result["success"],
+                        }
+                    )
+
+                elif tool_name == "verify_dafny":
+                    attempts += 1
+                    result = verify_dafny(messages)
+
+                    logger.info(
+                        f"Attempt {attempts}: Verification {'succeeded' if result['success'] else 'failed'}"
+                    )
+
+                    # Save artifact with current code
+                    if result.get("code"):
+                        save_artifact(sample.test_id, attempts, result["code"])
 
                     if result["success"]:
                         # Verification succeeded!
                         success = True
-                        final_code = code
+                        final_code = result.get("code")
                         logger.info(f"Success after {attempts} attempts")
 
-                        # Add tool result to message history
                         tool_results.append(
                             {
                                 "type": "tool_result",
@@ -143,9 +372,8 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
                                 "content": result["message"],
                             }
                         )
-
                     else:
-                        # Verification failed - return error for agent to retry
+                        # Verification failed
                         logger.debug(
                             f"Verification failed: {result['message'][:100]}..."
                         )
@@ -166,8 +394,8 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
             try:
                 response = client.messages.create(
                     model=model,
-                    max_tokens=8192,  # Increased to handle longer responses
-                    system=DAFNY_SYSTEM_PROMPT,
+                    max_tokens=8192,
+                    system=RAWDOG_SYSTEM_PROMPT,
                     messages=messages,
                     tools=tools,
                 )
@@ -175,13 +403,14 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
                 logger.error(f"API error on final call: {e}")
             break
 
-    # Use last_code if we didn't get final_code from success
-    if not success and last_code:
-        final_code = last_code
-        # Run one final verification to get error details
-        result = verify_dafny(final_code)
-        error_type = categorize_error(result.get("stderr", ""))
-        logger.warning(f"Failed after {attempts} attempts: {error_type}")
+    # Get final code from state if we didn't get it from success
+    if not success:
+        final_code = get_code_state(messages)
+        if final_code:
+            # Run one final verification to get error details
+            result = verify_dafny(messages)
+            error_type = categorize_error(result.get("stderr", ""))
+            logger.warning(f"Failed after {attempts} attempts: {error_type}")
 
     return AgentResult(
         sample_id=sample.test_id,
