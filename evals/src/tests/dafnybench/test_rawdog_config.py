@@ -25,7 +25,7 @@ def test_evaluation_config():
     assert config.evaluation.max_iterations == 20
     assert config.evaluation.max_tokens == 8192
     assert config.evaluation.verification_timeout == 30
-    assert config.evaluation.default_model == "claude-sonnet-4-5"
+    assert config.evaluation.default_model == "claude-haiku-4-5"
 
 
 def test_logging_config():

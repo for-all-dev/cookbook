@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
 from evals.dafnybench.inspect_ai.utils import ExtractionStrategy
 from evals.dafnybench.rawdog import run_dafnybench_rawdog
+from evals.dafnybench.rawdog.config import get_config
 
 # Load environment variables from .env file
 # Check both project root and evals/ directory
@@ -18,11 +19,14 @@ for env_path in [DOTENV, Path("evals") / DOTENV, Path("../") / DOTENV]:
         load_dotenv(env_path)
         break
 
-# Default configuration
+# Default configuration - load from config
+config = get_config()
+DEFAULT_MODEL = f"anthropic/{config.evaluation.default_model}"
+DEFAULT_LIMIT = 10
+
+# Model shortcuts (for backwards compatibility)
 SONNET = "anthropic/claude-sonnet-4-5"
 HAIKU = "anthropic/claude-haiku-4-5"
-DEFAULT_MODEL = SONNET
-DEFAULT_LIMIT = 10
 
 app = typer.Typer(help="Evaluation tools for formal verification benchmarks")
 
