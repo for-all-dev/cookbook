@@ -156,25 +156,34 @@ def fvapps_pydantic(
         typer.Option(
             "--limit",
             "-l",
-            help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT})",
+            help=f"Limit number of samples to evaluate (default: {DEFAULT_LIMIT}, use -1 for all samples)",
         ),
     ] = DEFAULT_LIMIT,
 ) -> None:
     """Run FVAPPS (Lean) evaluation using Pydantic AI framework.
 
-    FVAPPS is a Lean theorem proving benchmark. This implementation uses
-    the Pydantic AI framework for structured agent workflows.
+    FVAPPS is a Lean theorem proving benchmark where agents write terminating
+    functional programs that satisfy specifications and pass unit tests.
 
     Examples:
-        # Run with defaults
+        # Run with defaults (Claude Sonnet 4.5, 10 samples)
         uv run agent fvapps pydantic
 
+        # Test with just 1 sample
+        uv run agent fvapps pydantic --limit 1
+
         # Use different model
-        uv run agent fvapps pydantic -m anthropic/claude-opus-4
+        uv run agent fvapps pydantic -m anthropic/claude-haiku-4-5
     """
-    typer.echo("FVAPPS pydantic implementation not yet available", err=True)
-    typer.echo("This will be implemented in chapter 4 of the book.", err=True)
-    raise typer.Exit(code=1)
+    from evals.fvapps.pydantic_ai import run_fvapps_eval
+
+    # Convert limit=-1 to None (all samples)
+    eval_limit = None if limit == -1 else limit
+
+    typer.echo(
+        f"Running FVAPPS with Pydantic AI (limit={limit if limit != -1 else 'all'})..."
+    )
+    run_fvapps_eval(model=model, limit=eval_limit)
 
 
 def main() -> None:
