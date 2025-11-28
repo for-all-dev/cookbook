@@ -127,8 +127,8 @@ def test_insert_invariant_by_line():
     assert "inserted" in result["message"].lower()
     assert "line 2" in result["message"]  # Line 2 in 1-indexed output
 
-    final_code = get_code_state(messages)
-    assert "invariant 0 <= i <= n" in final_code
+    # Check the returned code (insertion tools no longer update state internally)
+    assert "invariant 0 <= i <= n" in result["code"]
 
 
 def test_insert_invariant_by_context():
@@ -142,8 +142,8 @@ def test_insert_invariant_by_context():
     )
 
     assert result["success"]
-    final_code = get_code_state(messages)
-    assert "invariant 0 <= i <= n" in final_code
+    # Check the returned code
+    assert "invariant 0 <= i <= n" in result["code"]
 
 
 def test_insertion_error_handling():
@@ -166,7 +166,7 @@ def test_insertion_error_handling():
 
 
 def test_multiple_insertions():
-    """Test multiple sequential hint insertions."""
+    """Test multiple sequential hint insertions with manual state updates."""
     messages = []
     initial_code = "method Sum(n: nat) returns (sum: nat)\n{\n  sum := 0;\n}"
     update_code_state(messages, initial_code)
@@ -176,27 +176,32 @@ def test_multiple_insertions():
         messages, invariant="n >= 0", context_before="method Sum"
     )
     assert result1["success"]
+    assert "n >= 0" in result1["code"]
+
+    # Manually update state (simulating what agent does)
+    update_code_state(messages, result1["code"])
 
     # Insert another hint
     result2 = insert_invariant(messages, invariant="sum >= 0", line_number=4)
     assert result2["success"]
 
-    # Check both hints are in final code
-    final_code = get_code_state(messages)
-    assert "n >= 0" in final_code
-    assert "sum >= 0" in final_code
+    # Check both hints are in second result
+    assert "n >= 0" in result2["code"]
+    assert "sum >= 0" in result2["code"]
 
 
 def test_state_in_tool_results():
-    """Test that state updates appear in message history correctly."""
+    """Test that state updates work when manually applied (agent pattern)."""
     messages = []
     initial_code = "method Test() {}"
     update_code_state(messages, initial_code)
 
-    # Add a hint
-    insert_invariant(messages, invariant="true", line_number=1)
+    # Add a hint and manually update state (agent pattern)
+    result = insert_invariant(messages, invariant="true", line_number=1)
+    assert result["success"]
+    update_code_state(messages, result["code"])
 
-    # Check that we have 2 state updates
+    # Check that we have 2 state updates now
     user_messages = [m for m in messages if m["role"] == "user"]
     assert len(user_messages) == 2
 
@@ -224,6 +229,5 @@ def test_insertion_preserves_indentation():
     )
     assert result["success"]
 
-    final_code = get_code_state(messages)
-    # Check that invariant has same indentation as while statement
-    assert "  invariant 0 <= x <= 10" in final_code
+    # Check that invariant has same indentation as while statement in returned code
+    assert "  invariant 0 <= x <= 10" in result["code"]
