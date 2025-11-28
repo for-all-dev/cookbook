@@ -1,0 +1,79 @@
+"""Type definitions and utilities for rawdog DafnyBench implementation."""
+
+import logging
+from datetime import datetime
+from pathlib import Path
+
+from pydantic import BaseModel
+
+
+class EvalSample(BaseModel):
+    """Single evaluation sample from DafnyBench dataset."""
+
+    test_id: str
+    input: str  # Task prompt with code
+    hints_removed: str  # Code with hints removed
+    ground_truth: str  # Expected correct code
+
+
+class AgentResult(BaseModel):
+    """Result for a single sample evaluation."""
+
+    sample_id: str
+    success: bool
+    attempts: int  # Number of verify_dafny calls
+    final_code: str | None
+    error_type: str | None  # Only if not success
+
+
+class EvalMetrics(BaseModel):
+    """Aggregated metrics across all samples."""
+
+    total_samples: int
+    successful: int
+    accuracy: float  # successful / total_samples
+    average_attempts: float
+    error_distribution: dict[str, int]  # error_type -> count
+
+
+def setup_logging() -> None:
+    """Setup logging to logs/rawdog_YYYYMMDD_HHMMSS.log.
+
+    Creates logs directory if it doesn't exist and configures logging
+    to write to both file and console.
+    """
+    logs_dir = Path("logs")
+    logs_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = logs_dir / f"rawdog_{timestamp}.log"
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(),  # Also print to console
+        ],
+    )
+
+
+def save_artifact(test_id: str, attempt: int, code: str) -> None:
+    """Save Dafny code artifact to artifacts/sample_<id>_attempt_<n>.dfy.
+
+    Args:
+        test_id: Test identifier from dataset
+        attempt: Attempt number (1-indexed)
+        code: Dafny code to save
+
+    Creates artifacts directory if it doesn't exist. Sanitizes test_id
+    for use in filename.
+    """
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+
+    # Sanitize test_id for filename
+    safe_id = test_id.replace("/", "_").replace("\\", "_")
+    artifact_path = artifacts_dir / f"sample_{safe_id}_attempt_{attempt}.dfy"
+
+    artifact_path.write_text(code)

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
 from evals.dafnybench.inspect_ai.utils import ExtractionStrategy
+from evals.dafnybench.rawdog import run_dafnybench_rawdog
 
 # Load environment variables from .env file
 # Check both project root and evals/ directory
@@ -131,9 +132,13 @@ def dafnybench_raw(
         # Run with all samples
         uv run agent dafnybench raw --limit -1
     """
-    typer.echo("DafnyBench raw implementation not yet available", err=True)
-    typer.echo("This will be implemented in chapter 3 of the book.", err=True)
-    raise typer.Exit(code=1)
+    # Convert limit=-1 to None (all samples)
+    eval_limit = None if limit == -1 else limit
+
+    typer.echo(
+        f"Running DafnyBench rawdog (limit={limit if limit != -1 else 'all'})..."
+    )
+    run_dafnybench_rawdog(model=model, limit=eval_limit)
 
 
 @fvapps_app.command("pydantic")
