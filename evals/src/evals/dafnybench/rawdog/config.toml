@@ -183,6 +183,26 @@ method Example(n: nat) returns (r: nat)
 
 Good luck! Start by analyzing the code and identifying what verification hints are needed."""
 
+# Template for initial code state message
+# Available variables: {code}
+initial_state_template = """=== CURRENT_CODE_STATE ===
+
+```dafny
+{code}
+```
+
+Above is the initial unhinted code. Use insertion tools to add verification hints."""
+
+# Template for code state update messages
+# Available variables: {code}
+state_update_template = """=== CURRENT_CODE_STATE ===
+
+```dafny
+{code}
+```
+
+State updated after hint insertion."""
+
 [dataset]
 # HuggingFace dataset configuration
 name = "wendy-sun/DafnyBench"

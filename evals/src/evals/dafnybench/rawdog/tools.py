@@ -52,13 +52,10 @@ def update_code_state(messages: list[dict], new_code: str) -> None:
         messages: Message history to update (modified in place)
         new_code: New code state to store
     """
-    state_message = f"""=== CURRENT_CODE_STATE ===
+    from evals.dafnybench.rawdog.config import get_config
 
-```dafny
-{new_code}
-```
-
-State updated after hint insertion."""
+    config = get_config()
+    state_message = config.prompt.state_update_template.format(code=new_code)
 
     messages.append({"role": "user", "content": state_message})
 

@@ -62,14 +62,10 @@ def run_agent(
     if model.startswith("anthropic/"):
         model = model.replace("anthropic/", "")
 
-    # Initialize message history with code state
-    initial_state = f"""=== CURRENT_CODE_STATE ===
-
-```dafny
-{sample.hints_removed}
-```
-
-Above is the initial unhinted code. Use insertion tools to add verification hints."""
+    # Initialize message history with code state (using template from config)
+    initial_state = config.prompt.initial_state_template.format(
+        code=sample.hints_removed
+    )
 
     messages = [
         {"role": "user", "content": sample.input},

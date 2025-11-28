@@ -34,6 +34,8 @@ class PromptConfig:
     """Prompt settings."""
 
     system_prompt: str
+    initial_state_template: str
+    state_update_template: str
 
 
 @dataclass

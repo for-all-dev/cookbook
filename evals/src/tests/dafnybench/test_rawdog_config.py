@@ -82,3 +82,28 @@ def test_config_reload():
 
     # Should have same values but might be different objects
     assert config1.evaluation.max_iterations == config2.evaluation.max_iterations
+
+
+def test_prompt_templates():
+    """Test that prompt templates exist and support interpolation."""
+    config = get_config()
+
+    # Check initial state template
+    assert config.prompt.initial_state_template
+    assert "{code}" in config.prompt.initial_state_template
+    assert "CURRENT_CODE_STATE" in config.prompt.initial_state_template
+
+    # Check state update template
+    assert config.prompt.state_update_template
+    assert "{code}" in config.prompt.state_update_template
+    assert "CURRENT_CODE_STATE" in config.prompt.state_update_template
+
+    # Test interpolation works
+    test_code = "method Test() {}"
+    initial = config.prompt.initial_state_template.format(code=test_code)
+    assert test_code in initial
+    assert "initial unhinted code" in initial
+
+    update = config.prompt.state_update_template.format(code=test_code)
+    assert test_code in update
+    assert "State updated" in update
