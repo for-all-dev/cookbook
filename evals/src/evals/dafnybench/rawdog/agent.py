@@ -19,6 +19,7 @@ from evals.dafnybench.rawdog.tools import (
     insert_measure,
     insert_postcondition,
     insert_precondition,
+    update_code_state,
     verify_dafny,
 )
 from evals.dafnybench.rawdog.types import AgentResult, EvalSample, save_artifact
@@ -250,6 +251,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
 
         # Process tool uses
         tool_results = []
+        latest_code = None  # Track latest code state from insertions
+
         for content_block in response.content:
             if content_block.type == "tool_use":
                 tool_name = content_block.name
@@ -274,6 +277,9 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             "is_error": not result["success"],
                         }
                     )
+                    # Track latest code for cumulative updates
+                    if result["success"] and result.get("code"):
+                        latest_code = result["code"]
 
                 elif tool_name == "insert_assertion":
                     result = insert_assertion(
@@ -292,6 +298,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             "is_error": not result["success"],
                         }
                     )
+                    if result["success"] and result.get("code"):
+                        latest_code = result["code"]
 
                 elif tool_name == "insert_precondition":
                     result = insert_precondition(
@@ -310,6 +318,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             "is_error": not result["success"],
                         }
                     )
+                    if result["success"] and result.get("code"):
+                        latest_code = result["code"]
 
                 elif tool_name == "insert_postcondition":
                     result = insert_postcondition(
@@ -328,6 +338,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             "is_error": not result["success"],
                         }
                     )
+                    if result["success"] and result.get("code"):
+                        latest_code = result["code"]
 
                 elif tool_name == "insert_measure":
                     result = insert_measure(
@@ -346,6 +358,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             "is_error": not result["success"],
                         }
                     )
+                    if result["success"] and result.get("code"):
+                        latest_code = result["code"]
 
                 elif tool_name == "verify_dafny":
                     attempts += 1
@@ -386,8 +400,14 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
                             }
                         )
 
-        # Add tool results as user message
+        # Add tool results as user message (BEFORE state update to maintain pairing)
         messages.append({"role": "user", "content": tool_results})
+
+        # Update code state AFTER tool_results to maintain proper Anthropic message pairing
+        # Note: This means multiple insertions in one turn are NOT cumulative - agent must
+        # call verify_dafny or make multiple turns to see cumulative effects
+        if latest_code is not None:
+            update_code_state(messages, latest_code)
 
         # If verification succeeded, make one more API call to let model respond
         if success:

@@ -224,8 +224,8 @@ def insert_hint(
     # Reconstruct code
     new_code = "\n".join(code_lines)
 
-    # Update state in message history
-    update_code_state(messages, new_code)
+    # DON'T update state here - let the agent do it after collecting all tool results
+    # This prevents breaking tool_use/tool_result pairing in message history
 
     return {
         "success": True,
