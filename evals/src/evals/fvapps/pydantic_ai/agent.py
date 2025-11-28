@@ -103,11 +103,13 @@ Write the complete implementation and proofs, then call verify_lean tool to chec
         # Run agent (pydantic-ai handles tool iteration automatically in run_sync)
         result = agent.run_sync(user_prompt, deps=deps)
 
-        # Extract code from result
-        final_code = extract_code(result.data)
+        # Extract code from result (pydantic-ai uses .data attribute on RunResult)
+        # Get the output text from the result
+        output_text = str(result.data) if hasattr(result, 'data') else str(result)
+        final_code = extract_code(output_text)
 
         # Check if verification succeeded (based on success message in output)
-        success = "✓ Verification succeeded" in result.data
+        success = "✓ Verification succeeded" in output_text
 
         if success:
             logger.info(f"Success after {deps.attempts} attempts")
