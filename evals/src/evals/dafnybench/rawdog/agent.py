@@ -11,7 +11,7 @@ import logging
 
 import anthropic
 from evals.dafnybench.inspect_ai.utils import categorize_error
-from evals.dafnybench.rawdog.prompt import RAWDOG_SYSTEM_PROMPT
+from evals.dafnybench.rawdog.config import get_config
 from evals.dafnybench.rawdog.tools import (
     get_code_state,
     insert_assertion,
@@ -25,7 +25,9 @@ from evals.dafnybench.rawdog.tools import (
 from evals.dafnybench.rawdog.types import AgentResult, EvalSample, save_artifact
 
 
-def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> AgentResult:
+def run_agent(
+    sample: EvalSample, model: str, max_iterations: int | None = None
+) -> AgentResult:
     """Run agent on a single sample with manual tool-calling loop.
 
     This function implements the core tool-calling loop that inspect-ai's
@@ -41,11 +43,18 @@ def run_agent(sample: EvalSample, model: str, max_iterations: int = 20) -> Agent
     Args:
         sample: Evaluation sample with code to verify
         model: Model identifier (e.g., "anthropic/claude-sonnet-4-5")
-        max_iterations: Maximum number of tool-calling iterations
+        max_iterations: Maximum number of tool-calling iterations (None = use config)
 
     Returns:
         AgentResult with success status, attempts, final code, and error type
     """
+    # Load configuration
+    config = get_config()
+
+    # Use config defaults if not specified
+    if max_iterations is None:
+        max_iterations = config.evaluation.max_iterations
+
     # Initialize Anthropic client
     client = anthropic.Anthropic()
 
@@ -225,8 +234,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
             # Call Anthropic API
             response = client.messages.create(
                 model=model,
-                max_tokens=8192,  # Increased to handle longer responses
-                system=RAWDOG_SYSTEM_PROMPT,
+                max_tokens=config.evaluation.max_tokens,
+                system=config.prompt.system_prompt,
                 messages=messages,
                 tools=tools,
             )
@@ -414,8 +423,8 @@ Above is the initial unhinted code. Use insertion tools to add verification hint
             try:
                 response = client.messages.create(
                     model=model,
-                    max_tokens=8192,
-                    system=RAWDOG_SYSTEM_PROMPT,
+                    max_tokens=config.evaluation.max_tokens,
+                    system=config.prompt.system_prompt,
                     messages=messages,
                     tools=tools,
                 )
