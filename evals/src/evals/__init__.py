@@ -141,8 +141,8 @@ def dafnybench_raw(
     run_dafnybench_rawdog(model=model, limit=eval_limit)
 
 
-@fvapps_app.command("pydantic")
-def fvapps_pydantic(
+@fvapps_app.command("pydanticai")
+def fvapps_pydanticai(
     model: Annotated[
         str,
         typer.Option(
