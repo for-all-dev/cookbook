@@ -29,7 +29,7 @@ from evals.dafnybench.inspect_ai.utils import (
 
 from inspect_ai import Task, eval, task
 from inspect_ai.model import Model
-from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
+from inspect_ai.scorer import Score, Scorer, accuracy, scorer, stderr
 from inspect_ai.solver import TaskState, generate, system_message, use_tools
 from inspect_ai.util import sandbox
 
