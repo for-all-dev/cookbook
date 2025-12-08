@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 
 from evals.dafnybench.inspect_ai import run_dafnybench_eval
 from evals.dafnybench.inspect_ai.utils import ExtractionStrategy
-from evals.dafnybench.rawdog import run_dafnybench_rawdog
-from evals.dafnybench.rawdog.config import get_config
+from evals.dafnybench.plain import run_dafnybench_plain
+from evals.dafnybench.plain.config import get_config
 
 # Load environment variables from .env file
 # Check both project root and evals/ directory
@@ -105,8 +105,8 @@ def dafnybench_inspect(
     )
 
 
-@dafnybench_app.command("raw")
-def dafnybench_raw(
+@dafnybench_app.command("plain")
+def dafnybench_plain(
     model: Annotated[
         str,
         typer.Option(
@@ -124,25 +124,25 @@ def dafnybench_raw(
         ),
     ] = DEFAULT_LIMIT,
 ) -> None:
-    """Run DafnyBench evaluation using raw Anthropic SDK (no framework).
+    """Run DafnyBench evaluation using plain Anthropic SDK (no framework).
 
     This implementation shows what Inspect AI abstracts away by implementing
     the evaluation loop manually with just the Anthropic SDK.
 
     Examples:
         # Run with defaults
-        uv run agent dafnybench raw
+        uv run agent dafnybench plain
 
         # Run with all samples
-        uv run agent dafnybench raw --limit -1
+        uv run agent dafnybench plain --limit -1
     """
     # Convert limit=-1 to None (all samples)
     eval_limit = None if limit == -1 else limit
 
     typer.echo(
-        f"Running DafnyBench rawdog (limit={limit if limit != -1 else 'all'})..."
+        f"Running DafnyBench plain (limit={limit if limit != -1 else 'all'})..."
     )
-    run_dafnybench_rawdog(model=model, limit=eval_limit)
+    run_dafnybench_plain(model=model, limit=eval_limit)
 
 
 @fvapps_app.command("pydanticai")

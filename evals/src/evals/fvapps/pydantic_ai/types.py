@@ -7,6 +7,29 @@ from pathlib import Path
 from pydantic import BaseModel
 
 
+def get_workspace_root() -> Path:
+    """Find the workspace root by looking for the root pyproject.toml.
+
+    Returns:
+        Path to the workspace root directory
+
+    Raises:
+        RuntimeError: If workspace root cannot be found
+    """
+    current = Path(__file__).resolve()
+
+    # Walk up the directory tree looking for workspace root
+    for parent in current.parents:
+        pyproject = parent / "pyproject.toml"
+        if pyproject.exists():
+            # Check if this is the root (has [tool.uv.workspace])
+            content = pyproject.read_text()
+            if "[tool.uv.workspace]" in content:
+                return parent
+
+    raise RuntimeError("Could not find workspace root (pyproject.toml with [tool.uv.workspace])")
+
+
 class FVAPPSSample(BaseModel):
     """Single sample from quinn-dougherty/fvapps dataset."""
 
@@ -42,10 +65,11 @@ class EvalMetrics(BaseModel):
 def setup_logging() -> None:
     """Setup logging to logs/fvapps_pydantic_YYYYMMDD_HHMMSS.log.
 
-    Creates logs directory if it doesn't exist and configures logging
-    to write to both file and console.
+    Creates logs directory in workspace root if it doesn't exist and configures
+    logging to write to both file and console.
     """
-    logs_dir = Path("logs")
+    workspace_root = get_workspace_root()
+    logs_dir = workspace_root / "logs"
     logs_dir.mkdir(exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

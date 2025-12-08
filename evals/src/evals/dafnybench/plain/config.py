@@ -1,4 +1,4 @@
-"""Configuration loading for DafnyBench rawdog implementation."""
+"""Configuration loading for DafnyBench plain implementation."""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -47,8 +47,8 @@ class DatasetConfig:
 
 
 @dataclass
-class RawdogConfig:
-    """Complete configuration for rawdog evaluation."""
+class PlainConfig:
+    """Complete configuration for plain evaluation."""
 
     evaluation: EvaluationConfig
     logging: LoggingConfig
@@ -56,7 +56,7 @@ class RawdogConfig:
     dataset: DatasetConfig
 
     @classmethod
-    def from_file(cls, config_path: Path | str | None = None) -> "RawdogConfig":
+    def from_file(cls, config_path: Path | str | None = None) -> "PlainConfig":
         """Load configuration from TOML file.
 
         Args:
@@ -86,43 +86,43 @@ class RawdogConfig:
         )
 
     @classmethod
-    def default(cls) -> "RawdogConfig":
+    def default(cls) -> "PlainConfig":
         """Get default configuration (loads from default config.toml location).
 
         Returns:
-            RawdogConfig instance with default settings
+            PlainConfig instance with default settings
         """
         return cls.from_file()
 
 
 # Singleton instance
-_config: RawdogConfig | None = None
+_config: PlainConfig | None = None
 
 
-def get_config(reload: bool = False) -> RawdogConfig:
+def get_config(reload: bool = False) -> PlainConfig:
     """Get the global configuration instance.
 
     Args:
         reload: If True, reload configuration from file
 
     Returns:
-        RawdogConfig instance
+        PlainConfig instance
     """
     global _config
     if _config is None or reload:
-        _config = RawdogConfig.default()
+        _config = PlainConfig.default()
     return _config
 
 
-def load_config(config_path: Path | str) -> RawdogConfig:
+def load_config(config_path: Path | str) -> PlainConfig:
     """Load configuration from a specific path and set as global.
 
     Args:
         config_path: Path to config.toml
 
     Returns:
-        RawdogConfig instance
+        PlainConfig instance
     """
     global _config
-    _config = RawdogConfig.from_file(config_path)
+    _config = PlainConfig.from_file(config_path)
     return _config

@@ -10,7 +10,7 @@ class DafnyBenchSample:
     """Single sample from DafnyBench dataset.
 
     This is a framework-agnostic representation that can be converted
-    to inspect_ai.Sample, rawdog EvalSample, or other formats.
+    to inspect_ai.Sample, plain EvalSample, or other formats.
     """
 
     test_id: str

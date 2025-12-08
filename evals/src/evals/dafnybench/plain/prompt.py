@@ -1,10 +1,10 @@
-"""System prompt for tool-based DafnyBench rawdog implementation.
+"""System prompt for tool-based DafnyBench plain implementation.
 
 DEPRECATED: This module is kept for backwards compatibility.
 Use config.toml to configure the system prompt instead.
 """
 
-from evals.dafnybench.rawdog.config import get_config
+from evals.dafnybench.plain.config import get_config
 
 
 def get_system_prompt() -> str:
@@ -17,5 +17,5 @@ def get_system_prompt() -> str:
 
 
 # Backwards compatibility: Load prompt from config as module constant
-# This allows existing code that imports RAWDOG_SYSTEM_PROMPT to still work
-RAWDOG_SYSTEM_PROMPT = get_system_prompt()
+# This allows existing code that imports PLAIN_SYSTEM_PROMPT to still work
+PLAIN_SYSTEM_PROMPT = get_system_prompt()

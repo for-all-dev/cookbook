@@ -1,6 +1,6 @@
-"""Result aggregation and metrics for rawdog DafnyBench implementation."""
+"""Result aggregation and metrics for plain DafnyBench implementation."""
 
-from evals.dafnybench.rawdog.types import AgentResult, EvalMetrics
+from evals.dafnybench.plain.types import AgentResult, EvalMetrics
 
 
 def aggregate_results(results: list[AgentResult]) -> EvalMetrics:

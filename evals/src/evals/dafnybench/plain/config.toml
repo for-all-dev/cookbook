@@ -1,4 +1,4 @@
-# Configuration for DafnyBench Rawdog Evaluation
+# Configuration for DafnyBench Plain Evaluation
 
 [evaluation]
 # Maximum number of tool-calling iterations per sample

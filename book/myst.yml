@@ -17,9 +17,9 @@ project:
     - title: "Dafny part 1: with a framework"
       children:
         - pattern: 02-dafny-and-inspect/*.md
-    - title: "Dafny part 2: no framework"
+    - title: "Dafny part 2: plain Python"
       children:
-        - pattern: 03-dafny-and-rawdog/*.md
+        - pattern: 03-dafny-and-plain/*.md
     - title: Lean
       children:
         - pattern: 04-lean-and-pydanticai/*.md

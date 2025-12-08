@@ -3,19 +3,19 @@
 This module implements the DafnyBench evaluation using only the Anthropic SDK,
 demonstrating what inspect-ai abstracts away with its generate() function.
 
-The "rawdog" approach shows the manual tool-calling loop, message management,
+The "plain Python" approach shows the manual tool-calling loop, message management,
 and iteration control that frameworks handle automatically.
 """
 
 import logging
 
 from evals.dafnybench.common.dataset import load_dafnybench_dataset
-from evals.dafnybench.rawdog.agent import run_agent
-from evals.dafnybench.rawdog.metrics import aggregate_results
-from evals.dafnybench.rawdog.types import EvalSample, setup_logging
+from evals.dafnybench.plain.agent import run_agent
+from evals.dafnybench.plain.metrics import aggregate_results
+from evals.dafnybench.plain.types import EvalSample, setup_logging
 
 
-def run_dafnybench_rawdog(model: str, limit: int | None) -> None:
+def run_dafnybench_plain(model: str, limit: int | None) -> None:
     """Run DafnyBench evaluation with pure Anthropic SDK.
 
     This function demonstrates the complete evaluation flow without using

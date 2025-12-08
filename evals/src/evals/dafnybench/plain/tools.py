@@ -1,4 +1,4 @@
-"""Tool execution for rawdog DafnyBench implementation with hint insertion tools."""
+"""Tool execution for plain DafnyBench implementation with hint insertion tools."""
 
 import subprocess
 import tempfile
@@ -52,7 +52,7 @@ def update_code_state(messages: list[dict], new_code: str) -> None:
         messages: Message history to update (modified in place)
         new_code: New code state to store
     """
-    from evals.dafnybench.rawdog.config import get_config
+    from evals.dafnybench.plain.config import get_config
 
     config = get_config()
     state_message = config.prompt.state_update_template.format(code=new_code)
