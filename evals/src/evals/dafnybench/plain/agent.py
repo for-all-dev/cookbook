@@ -28,6 +28,172 @@ from evals.dafnybench.plain.tools import (
 )
 
 
+def handle_tool(
+    tool_name: str,
+    tool_input: dict,
+    tool_use_id: str,
+    messages: list[dict],
+    sample: EvalSample,
+    attempts: int,
+    success: bool,
+    final_code: str | None,
+) -> tuple[dict, int, bool, str | None, str | None]:
+    """Handle a single tool call and return results.
+
+    Args:
+        tool_name: Name of the tool to call
+        tool_input: Input parameters for the tool
+        tool_use_id: Tool use ID from Anthropic API
+        messages: Message history
+        sample: Current evaluation sample
+        attempts: Current attempt count
+        success: Current success status
+        final_code: Current final code
+
+    Returns:
+        Tuple of (tool_result_dict, attempts, success, final_code, latest_code)
+    """
+    logger = logging.getLogger(__name__)
+    latest_code = None
+
+    match tool_name:
+        case "insert_invariant":
+            result = insert_invariant(
+                messages,
+                invariant=tool_input["invariant"],
+                line_number=tool_input.get("line_number"),
+                context_before=tool_input.get("context_before"),
+                context_after=tool_input.get("context_after"),
+            )
+            logger.info(f"Insert invariant: {result['message']}")
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result["message"],
+                "is_error": not result["success"],
+            }
+            if result["success"] and result.get("code"):
+                latest_code = result["code"]
+
+        case "insert_assertion":
+            result = insert_assertion(
+                messages,
+                assertion=tool_input["assertion"],
+                line_number=tool_input.get("line_number"),
+                context_before=tool_input.get("context_before"),
+                context_after=tool_input.get("context_after"),
+            )
+            logger.info(f"Insert assertion: {result['message']}")
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result["message"],
+                "is_error": not result["success"],
+            }
+            if result["success"] and result.get("code"):
+                latest_code = result["code"]
+
+        case "insert_precondition":
+            result = insert_precondition(
+                messages,
+                precondition=tool_input["precondition"],
+                line_number=tool_input.get("line_number"),
+                context_before=tool_input.get("context_before"),
+                context_after=tool_input.get("context_after"),
+            )
+            logger.info(f"Insert precondition: {result['message']}")
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result["message"],
+                "is_error": not result["success"],
+            }
+            if result["success"] and result.get("code"):
+                latest_code = result["code"]
+
+        case "insert_postcondition":
+            result = insert_postcondition(
+                messages,
+                postcondition=tool_input["postcondition"],
+                line_number=tool_input.get("line_number"),
+                context_before=tool_input.get("context_before"),
+                context_after=tool_input.get("context_after"),
+            )
+            logger.info(f"Insert postcondition: {result['message']}")
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result["message"],
+                "is_error": not result["success"],
+            }
+            if result["success"] and result.get("code"):
+                latest_code = result["code"]
+
+        case "insert_measure":
+            result = insert_measure(
+                messages,
+                measure=tool_input["measure"],
+                line_number=tool_input.get("line_number"),
+                context_before=tool_input.get("context_before"),
+                context_after=tool_input.get("context_after"),
+            )
+            logger.info(f"Insert measure: {result['message']}")
+            tool_result = {
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result["message"],
+                "is_error": not result["success"],
+            }
+            if result["success"] and result.get("code"):
+                latest_code = result["code"]
+
+        case "verify_dafny":
+            attempts += 1
+            result = verify_dafny(messages)
+
+            logger.info(
+                f"Attempt {attempts}: Verification {'succeeded' if result['success'] else 'failed'}"
+            )
+
+            # Save artifact with current code
+            code = result.get("code")
+            if code and isinstance(code, str):
+                save_artifact(
+                    sample.test_id,
+                    attempts,
+                    code,
+                    is_final=bool(result.get("success")),
+                )
+
+            if result.get("success"):
+                # Verification succeeded!
+                success = True
+                code_value = result.get("code")
+                final_code = code_value if isinstance(code_value, str) else None
+                logger.info(f"Success after {attempts} attempts")
+
+                msg = result.get("message", "")
+                tool_result = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": msg if isinstance(msg, str) else str(msg),
+                }
+            else:
+                # Verification failed
+                msg = result.get("message", "")
+                msg_str = msg if isinstance(msg, str) else str(msg)
+                logger.debug(f"Verification failed: {msg_str[:100]}...")
+                tool_result = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": msg_str,
+                    "is_error": True,
+                }
+
+    latest_code_result: str | None = latest_code if isinstance(latest_code, str) else None
+    return tool_result, attempts, success, final_code, latest_code_result
+
+
 def run_agent(
     sample: EvalSample, model: str, max_iterations: int | None = None
 ) -> AgentResult:
@@ -126,164 +292,19 @@ def run_agent(
 
         for content_block in response.content:
             if content_block.type == "tool_use":
-                tool_name = content_block.name
-                tool_input = content_block.input
-                tool_use_id = content_block.id
-
-                # Route to appropriate tool using pattern matching
-                match tool_name:
-                    case "insert_invariant":
-                        result = insert_invariant(
-                            messages,
-                            invariant=tool_input["invariant"],
-                            line_number=tool_input.get("line_number"),
-                            context_before=tool_input.get("context_before"),
-                            context_after=tool_input.get("context_after"),
-                        )
-                        logger.info(f"Insert invariant: {result['message']}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result["message"],
-                                "is_error": not result["success"],
-                            }
-                        )
-                        # Track latest code for cumulative updates
-                        if result["success"] and result.get("code"):
-                            latest_code = result["code"]
-
-                    case "insert_assertion":
-                        result = insert_assertion(
-                            messages,
-                            assertion=tool_input["assertion"],
-                            line_number=tool_input.get("line_number"),
-                            context_before=tool_input.get("context_before"),
-                            context_after=tool_input.get("context_after"),
-                        )
-                        logger.info(f"Insert assertion: {result['message']}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result["message"],
-                                "is_error": not result["success"],
-                            }
-                        )
-                        if result["success"] and result.get("code"):
-                            latest_code = result["code"]
-
-                    case "insert_precondition":
-                        result = insert_precondition(
-                            messages,
-                            precondition=tool_input["precondition"],
-                            line_number=tool_input.get("line_number"),
-                            context_before=tool_input.get("context_before"),
-                            context_after=tool_input.get("context_after"),
-                        )
-                        logger.info(f"Insert precondition: {result['message']}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result["message"],
-                                "is_error": not result["success"],
-                            }
-                        )
-                        if result["success"] and result.get("code"):
-                            latest_code = result["code"]
-
-                    case "insert_postcondition":
-                        result = insert_postcondition(
-                            messages,
-                            postcondition=tool_input["postcondition"],
-                            line_number=tool_input.get("line_number"),
-                            context_before=tool_input.get("context_before"),
-                            context_after=tool_input.get("context_after"),
-                        )
-                        logger.info(f"Insert postcondition: {result['message']}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result["message"],
-                                "is_error": not result["success"],
-                            }
-                        )
-                        if result["success"] and result.get("code"):
-                            latest_code = result["code"]
-
-                    case "insert_measure":
-                        result = insert_measure(
-                            messages,
-                            measure=tool_input["measure"],
-                            line_number=tool_input.get("line_number"),
-                            context_before=tool_input.get("context_before"),
-                            context_after=tool_input.get("context_after"),
-                        )
-                        logger.info(f"Insert measure: {result['message']}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result["message"],
-                                "is_error": not result["success"],
-                            }
-                        )
-                        if result["success"] and result.get("code"):
-                            latest_code = result["code"]
-
-                    case "verify_dafny":
-                        attempts += 1
-                        result = verify_dafny(messages)
-
-                        logger.info(
-                            f"Attempt {attempts}: Verification {'succeeded' if result['success'] else 'failed'}"
-                        )
-
-                        # Save artifact with current code
-                        code = result.get("code")
-                        if code and isinstance(code, str):
-                            save_artifact(
-                                sample.test_id,
-                                attempts,
-                                code,
-                                is_final=bool(result.get("success")),
-                            )
-
-                        if result.get("success"):
-                            # Verification succeeded!
-                            success = True
-                            final_code = (
-                                result.get("code")
-                                if isinstance(result.get("code"), str)
-                                else None
-                            )
-                            logger.info(f"Success after {attempts} attempts")
-
-                            msg = result.get("message", "")
-                            tool_results.append(
-                                {
-                                    "type": "tool_result",
-                                    "tool_use_id": tool_use_id,
-                                    "content": msg
-                                    if isinstance(msg, str)
-                                    else str(msg),
-                                }
-                            )
-                        else:
-                            # Verification failed
-                            msg = result.get("message", "")
-                            msg_str = msg if isinstance(msg, str) else str(msg)
-                            logger.debug(f"Verification failed: {msg_str[:100]}...")
-                            tool_results.append(
-                                {
-                                    "type": "tool_result",
-                                    "tool_use_id": tool_use_id,
-                                    "content": msg_str,
-                                    "is_error": True,
-                                }
-                            )
+                tool_result, attempts, success, final_code, code_update = handle_tool(
+                    tool_name=content_block.name,
+                    tool_input=content_block.input,
+                    tool_use_id=content_block.id,
+                    messages=messages,
+                    sample=sample,
+                    attempts=attempts,
+                    success=success,
+                    final_code=final_code,
+                )
+                tool_results.append(tool_result)
+                if code_update is not None:
+                    latest_code = code_update
 
         # Add tool results as user message (BEFORE state update to maintain pairing)
         messages.append({"role": "user", "content": tool_results})
