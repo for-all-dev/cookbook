@@ -43,10 +43,10 @@ def run_dafnybench_rawdog(model: str, limit: int | None) -> None:
     # Convert to EvalSample format
     samples = [
         EvalSample(
-            test_id=s.metadata["test_id"],
-            input=s.input,
-            hints_removed=s.metadata["hints_removed"],
-            ground_truth=s.metadata["ground_truth"],
+            test_id=s.test_id,
+            input=f"Add verification hints to this Dafny code:\n\n{s.hints_removed}",
+            hints_removed=s.hints_removed,
+            ground_truth=s.ground_truth,
         )
         for s in dataset
     ]

@@ -19,6 +19,7 @@ Requirements:
 import tempfile
 
 from evals.dafnybench.common.dataset import load_dafnybench_dataset
+from evals.dafnybench.inspect_ai.dataset import convert_to_inspect_samples
 from evals.dafnybench.inspect_ai.prompt import DAFNY_SYSTEM_PROMPT
 from evals.dafnybench.inspect_ai.tools import verify_dafny
 from evals.dafnybench.inspect_ai.utils import (
@@ -130,9 +131,12 @@ def dafnybench(
         # Evaluate specific model
         inspect eval evals/dafnybench/inspect_ai.py -M anthropic/claude-3-5-sonnet-20241022
     """
-    dataset = load_dafnybench_dataset()
+    # Load framework-agnostic dataset and convert to inspect_ai format
+    common_dataset = load_dafnybench_dataset()
     if limit is not None:
-        dataset = dataset[:limit]
+        common_dataset = common_dataset[:limit]
+
+    dataset = convert_to_inspect_samples(common_dataset)
 
     # Add extraction strategy to each sample's metadata (store the value string)
     for sample in dataset:
