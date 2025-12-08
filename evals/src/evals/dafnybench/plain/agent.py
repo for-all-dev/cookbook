@@ -190,7 +190,9 @@ def handle_tool(
                     "is_error": True,
                 }
 
-    latest_code_result: str | None = latest_code if isinstance(latest_code, str) else None
+    latest_code_result: str | None = (
+        latest_code if isinstance(latest_code, str) else None
+    )
     return tool_result, attempts, success, final_code, latest_code_result
 
 
