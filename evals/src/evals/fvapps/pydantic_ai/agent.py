@@ -14,6 +14,11 @@ class AgentDeps:
     """Dependencies for agent tools."""
 
     def __init__(self, sample: FVAPPSSample):
+        """Initialize agent dependencies.
+
+        Args:
+            sample: FVAPPS sample to evaluate
+        """
         self.sample = sample
         self.attempts = 0
 
@@ -42,6 +47,7 @@ def create_fvapps_agent(model: str) -> Agent[AgentDeps, str]:
         """Verify Lean code with lake build.
 
         Args:
+            ctx: Pydantic-AI run context with agent dependencies
             code: Complete Lean program with sorry replaced
 
         Returns:
