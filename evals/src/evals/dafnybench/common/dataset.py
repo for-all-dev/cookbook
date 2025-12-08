@@ -32,12 +32,12 @@ def load_dafnybench_dataset() -> list[DafnyBenchSample]:
 
     samples = [
         DafnyBenchSample(
-            test_id=row["test_ID"],
-            test_file=row["test_file"],
-            hints_removed=row["hints_removed"],
-            ground_truth=row["ground_truth"],
+            test_id=row["test_ID"],  # type: ignore
+            test_file=row["test_file"],  # type: ignore
+            hints_removed=row["hints_removed"],  # type: ignore
+            ground_truth=row["ground_truth"],  # type: ignore
         )
-        for row in hf_dataset
+        for row in hf_dataset  # type: ignore
     ]
 
     return samples

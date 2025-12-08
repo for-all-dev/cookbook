@@ -62,9 +62,10 @@ def create_fvapps_agent(model: str) -> Agent[AgentDeps, str]:
         result = verify_lean(code, ctx.deps.sample.units)
 
         # Return message (pydantic-ai pattern: return string, not raise error)
-        return result["message"]
+        msg = result.get("message", "")
+        return msg if isinstance(msg, str) else str(msg)
 
-    return agent
+    return agent  # type: ignore
 
 
 def run_agent_on_sample(
@@ -123,7 +124,8 @@ Write the complete implementation and proofs, then call verify_lean tool to chec
         else:
             # Run final verification to get error details
             verify_result = verify_lean(final_code, sample.units)
-            error_type = categorize_error(verify_result["stderr"])
+            stderr = verify_result.get("stderr", "")
+            error_type = categorize_error(stderr if isinstance(stderr, str) else "")
             logger.warning(f"Failed after {deps.attempts} attempts: {error_type}")
 
         return AgentResult(

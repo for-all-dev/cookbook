@@ -107,10 +107,10 @@ ax.quiver(
 # Kill ticks and tick labels
 ax.set_xticks([])
 ax.set_yticks([])
-ax.set_zticks([])
+ax.set_zticks([])  # type: ignore
 ax.set_xticklabels([])
 ax.set_yticklabels([])
-ax.set_zticklabels([])
+ax.set_zticklabels([])  # type: ignore
 ax.set_zlabel("")
 
 # Set x-axis label to "time"

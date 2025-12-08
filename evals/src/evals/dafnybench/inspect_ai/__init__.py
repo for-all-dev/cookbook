@@ -96,7 +96,7 @@ def dafny_verifier() -> Scorer:
                     explanation=f"Error during verification: {str(e)}",
                 )
 
-    return score
+    return score  # type: ignore
 
 
 @task
@@ -140,6 +140,8 @@ def dafnybench(
 
     # Add extraction strategy to each sample's metadata (store the value string)
     for sample in dataset:
+        if sample.metadata is None:
+            sample.metadata = {}
         sample.metadata["extraction_strategy"] = extraction_strategy.value
 
     return Task(

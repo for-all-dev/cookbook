@@ -367,6 +367,7 @@ def insert_hint(
         }
 
     idx, indent = result
+    assert idx is not None, "idx should not be None after early return check"
 
     # Format hint
     hint_line = format_hint_line(hint_type, hint_content, indent)

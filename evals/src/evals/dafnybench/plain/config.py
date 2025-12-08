@@ -6,7 +6,7 @@ from pathlib import Path
 try:
     import tomllib  # Python 3.11+
 except ImportError:
-    import tomli as tomllib  # Fallback for Python < 3.11
+    import tomli as tomllib  # type: ignore  # Fallback for Python < 3.11
 
 
 @dataclass

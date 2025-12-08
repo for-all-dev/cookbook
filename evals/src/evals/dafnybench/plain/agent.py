@@ -242,37 +242,45 @@ def run_agent(
                         )
 
                         # Save artifact with current code
-                        if result.get("code"):
+                        code = result.get("code")
+                        if code and isinstance(code, str):
                             save_artifact(
                                 sample.test_id,
                                 attempts,
-                                result["code"],
-                                is_final=result["success"],
+                                code,
+                                is_final=bool(result.get("success")),
                             )
 
-                        if result["success"]:
+                        if result.get("success"):
                             # Verification succeeded!
                             success = True
-                            final_code = result.get("code")
+                            final_code = (
+                                result.get("code")
+                                if isinstance(result.get("code"), str)
+                                else None
+                            )
                             logger.info(f"Success after {attempts} attempts")
 
+                            msg = result.get("message", "")
                             tool_results.append(
                                 {
                                     "type": "tool_result",
                                     "tool_use_id": tool_use_id,
-                                    "content": result["message"],
+                                    "content": msg
+                                    if isinstance(msg, str)
+                                    else str(msg),
                                 }
                             )
                         else:
                             # Verification failed
-                            logger.debug(
-                                f"Verification failed: {result['message'][:100]}..."
-                            )
+                            msg = result.get("message", "")
+                            msg_str = msg if isinstance(msg, str) else str(msg)
+                            logger.debug(f"Verification failed: {msg_str[:100]}...")
                             tool_results.append(
                                 {
                                     "type": "tool_result",
                                     "tool_use_id": tool_use_id,
-                                    "content": result["message"],
+                                    "content": msg_str,
                                     "is_error": True,
                                 }
                             )
@@ -283,7 +291,7 @@ def run_agent(
         # Update code state AFTER tool_results to maintain proper Anthropic message pairing
         # Note: This means multiple insertions in one turn are NOT cumulative - agent must
         # call verify_dafny or make multiple turns to see cumulative effects
-        if latest_code is not None:
+        if latest_code is not None and isinstance(latest_code, str):
             update_code_state(messages, latest_code)
 
         # If verification succeeded, make one more API call to let model respond
@@ -306,7 +314,8 @@ def run_agent(
         if final_code:
             # Run one final verification to get error details
             result = verify_dafny(messages)
-            error_type = categorize_error(result.get("stderr", ""))
+            stderr = result.get("stderr", "")
+            error_type = categorize_error(stderr if isinstance(stderr, str) else "")
             logger.warning(f"Failed after {attempts} attempts: {error_type}")
 
     # Save full conversation history to JSON
@@ -321,6 +330,6 @@ def run_agent(
         sample_id=sample.test_id,
         success=success,
         attempts=attempts,
-        final_code=final_code,
+        final_code=final_code if isinstance(final_code, str) else None,
         error_type=error_type if not success else None,
     )

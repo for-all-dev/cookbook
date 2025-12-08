@@ -122,11 +122,11 @@ def test_insert_invariant_by_line():
     result = insert_invariant(messages, invariant="0 <= i <= n", line_number=2)
 
     assert result["success"]
-    assert "inserted" in result["message"].lower()
-    assert "line 2" in result["message"]  # Line 2 in 1-indexed output
+    assert "inserted" in result["message"].lower()  # type: ignore
+    assert "line 2" in result["message"]  # type: ignore
 
     # Check the returned code (insertion tools no longer update state internally)
-    assert "invariant 0 <= i <= n" in result["code"]
+    assert "invariant 0 <= i <= n" in result["code"]  # type: ignore
 
 
 def test_insert_invariant_by_context():
@@ -141,7 +141,7 @@ def test_insert_invariant_by_context():
 
     assert result["success"]
     # Check the returned code
-    assert "invariant 0 <= i <= n" in result["code"]
+    assert "invariant 0 <= i <= n" in result["code"]  # type: ignore
 
 
 def test_insertion_error_handling():
@@ -153,12 +153,12 @@ def test_insertion_error_handling():
     # Invalid line number
     result = insert_invariant(messages, invariant="true", line_number=100)
     assert not result["success"]
-    assert "out of range" in result["message"]
+    assert "out of range" in result["message"]  # type: ignore
 
     # Context not found
     result = insert_invariant(messages, invariant="true", context_before="nonexistent")
     assert not result["success"]
-    assert "not found" in result["message"]
+    assert "not found" in result["message"]  # type: ignore
 
 
 def test_multiple_insertions():
@@ -172,18 +172,18 @@ def test_multiple_insertions():
         messages, invariant="n >= 0", context_before="method Sum"
     )
     assert result1["success"]
-    assert "n >= 0" in result1["code"]
+    assert "n >= 0" in result1["code"]  # type: ignore
 
     # Manually update state (simulating what agent does)
-    update_code_state(messages, result1["code"])
+    update_code_state(messages, result1["code"])  # type: ignore
 
     # Insert another hint
     result2 = insert_invariant(messages, invariant="sum >= 0", line_number=4)
     assert result2["success"]
 
     # Check both hints are in second result
-    assert "n >= 0" in result2["code"]
-    assert "sum >= 0" in result2["code"]
+    assert "n >= 0" in result2["code"]  # type: ignore
+    assert "sum >= 0" in result2["code"]  # type: ignore
 
 
 def test_state_in_tool_results():
@@ -195,7 +195,7 @@ def test_state_in_tool_results():
     # Add a hint and manually update state (agent pattern)
     result = insert_invariant(messages, invariant="true", line_number=1)
     assert result["success"]
-    update_code_state(messages, result["code"])
+    update_code_state(messages, result["code"])  # type: ignore
 
     # Check that we have 2 state updates now
     user_messages = [m for m in messages if m["role"] == "user"]
@@ -226,4 +226,4 @@ def test_insertion_preserves_indentation():
     assert result["success"]
 
     # Check that invariant has same indentation as while statement in returned code
-    assert "  invariant 0 <= x <= 10" in result["code"]
+    assert "  invariant 0 <= x <= 10" in result["code"]  # type: ignore

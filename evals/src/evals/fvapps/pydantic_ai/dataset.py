@@ -14,13 +14,13 @@ def load_fvapps_dataset(split: str = "train") -> list[FVAPPSSample]:
 
     return [
         FVAPPSSample(
-            apps_id=row["apps_id"],
-            apps_question=row["apps_question"],
-            spec=row["spec"],
-            units=row["units"],
-            sorries=row["sorries"],
-            apps_difficulty=row.get("apps_difficulty"),
-            assurance_level=row.get("assurance_level"),
+            apps_id=row["apps_id"],  # type: ignore
+            apps_question=row["apps_question"],  # type: ignore
+            spec=row["spec"],  # type: ignore
+            units=row["units"],  # type: ignore
+            sorries=row["sorries"],  # type: ignore
+            apps_difficulty=row.get("apps_difficulty"),  # type: ignore
+            assurance_level=row.get("assurance_level"),  # type: ignore
         )
-        for row in hf_dataset
+        for row in hf_dataset  # type: ignore
     ]
