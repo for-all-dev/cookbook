@@ -13,6 +13,8 @@ from datetime import datetime
 import anthropic
 from evals.dafnybench.inspect_ai.utils import categorize_error
 from evals.dafnybench.plain.config import get_config
+from evals.dafnybench.plain.io_util import save_artifact, save_conversation_history
+from evals.dafnybench.plain.structures import AgentResult, EvalSample
 from evals.dafnybench.plain.tools import (
     TOOLS,
     get_code_state,
@@ -23,12 +25,6 @@ from evals.dafnybench.plain.tools import (
     insert_precondition,
     update_code_state,
     verify_dafny,
-)
-from evals.dafnybench.plain.types import (
-    AgentResult,
-    EvalSample,
-    save_artifact,
-    save_conversation_history,
 )
 
 

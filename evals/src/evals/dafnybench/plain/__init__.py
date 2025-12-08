@@ -11,8 +11,9 @@ import logging
 
 from evals.dafnybench.common.dataset import load_dafnybench_dataset
 from evals.dafnybench.plain.agent import run_agent
+from evals.dafnybench.plain.io_util import setup_logging
 from evals.dafnybench.plain.metrics import aggregate_results
-from evals.dafnybench.plain.types import EvalSample, setup_logging
+from evals.dafnybench.plain.structures import EvalSample
 
 
 def run_dafnybench_plain(model: str, limit: int | None) -> None:
