@@ -1,7 +1,6 @@
-"""Tests for rawdog tool-based hint insertion."""
+"""Tests for plain tool-based hint insertion."""
 
-
-from evals.dafnybench.rawdog.tools import (
+from evals.dafnybench.plain.tools import (
     find_insertion_point,
     format_hint_line,
     get_code_state,
@@ -157,9 +156,7 @@ def test_insertion_error_handling():
     assert "out of range" in result["message"]
 
     # Context not found
-    result = insert_invariant(
-        messages, invariant="true", context_before="nonexistent"
-    )
+    result = insert_invariant(messages, invariant="true", context_before="nonexistent")
     assert not result["success"]
     assert "not found" in result["message"]
 

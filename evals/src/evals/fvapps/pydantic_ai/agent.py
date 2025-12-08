@@ -105,7 +105,7 @@ Write the complete implementation and proofs, then call verify_lean tool to chec
 
         # Extract code from result (pydantic-ai uses .data attribute on RunResult)
         # Get the output text from the result
-        output_text = str(result.data) if hasattr(result, 'data') else str(result)
+        output_text = str(result.data) if hasattr(result, "data") else str(result)
         final_code = extract_code(output_text)
 
         # Check if verification succeeded (based on success message in output)

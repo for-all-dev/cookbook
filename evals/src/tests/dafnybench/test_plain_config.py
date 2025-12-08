@@ -1,13 +1,13 @@
-"""Tests for rawdog configuration loading."""
+"""Tests for plain configuration loading."""
 
 from pathlib import Path
 
-from evals.dafnybench.rawdog.config import RawdogConfig, get_config
+from evals.dafnybench.plain.config import PlainConfig, get_config
 
 
 def test_load_default_config():
     """Test loading default configuration."""
-    config = RawdogConfig.default()
+    config = PlainConfig.default()
 
     # Check that all sections loaded
     assert config.evaluation is not None
@@ -57,7 +57,7 @@ def test_dataset_config():
 
 def test_config_file_location():
     """Test that config file exists at expected location."""
-    from evals.dafnybench.rawdog import config as config_module
+    from evals.dafnybench.plain import config as config_module
 
     config_path = Path(config_module.__file__).parent / "config.toml"
     assert config_path.exists()
