@@ -27,7 +27,9 @@ def get_workspace_root() -> Path:
             if "[tool.uv.workspace]" in content:
                 return parent
 
-    raise RuntimeError("Could not find workspace root (pyproject.toml with [tool.uv.workspace])")
+    raise RuntimeError(
+        "Could not find workspace root (pyproject.toml with [tool.uv.workspace])"
+    )
 
 
 class FVAPPSSample(BaseModel):

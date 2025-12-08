@@ -139,9 +139,7 @@ def dafnybench_plain(
     # Convert limit=-1 to None (all samples)
     eval_limit = None if limit == -1 else limit
 
-    typer.echo(
-        f"Running DafnyBench plain (limit={limit if limit != -1 else 'all'})..."
-    )
+    typer.echo(f"Running DafnyBench plain (limit={limit if limit != -1 else 'all'})...")
     run_dafnybench_plain(model=model, limit=eval_limit)
 
 

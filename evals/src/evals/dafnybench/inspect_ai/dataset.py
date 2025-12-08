@@ -1,8 +1,8 @@
 """Dataset conversion utilities for inspect_ai framework."""
 
-from inspect_ai.dataset import Sample
-
 from evals.dafnybench.common.dataset import DafnyBenchSample
+
+from inspect_ai.dataset import Sample
 
 
 def convert_to_inspect_samples(samples: list[DafnyBenchSample]) -> list[Sample]:

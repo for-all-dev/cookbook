@@ -158,6 +158,7 @@ TOOLS = [
 
 # ===== Phase 1: State Management =====
 
+
 def get_code_state(messages: list[dict]) -> str | None:
     """Extract current code state from message history.
 
@@ -212,6 +213,7 @@ def update_code_state(messages: list[dict], new_code: str) -> None:
 
 
 # ===== Phase 2: Insertion Utilities =====
+
 
 def get_indentation(line: str) -> str:
     """Extract leading whitespace from a line.
@@ -316,6 +318,7 @@ def format_hint_line(hint_type: str, hint_content: str, indentation: str) -> str
 
 # ===== Phase 3: Specialized Insertion Tools =====
 
+
 def insert_hint(
     messages: list[dict],
     hint_type: str,
@@ -353,7 +356,9 @@ def insert_hint(
     code_lines = current_code.split("\n")
 
     # Find insertion point
-    result = find_insertion_point(code_lines, line_number, context_before, context_after)
+    result = find_insertion_point(
+        code_lines, line_number, context_before, context_after
+    )
     if result[0] is None:
         return {
             "success": False,
@@ -503,6 +508,7 @@ def insert_measure(
 
 
 # ===== Phase 4: Updated verify_dafny =====
+
 
 def verify_dafny(messages: list[dict]) -> dict[str, str | bool]:
     """Verify current code state using Dafny compiler.

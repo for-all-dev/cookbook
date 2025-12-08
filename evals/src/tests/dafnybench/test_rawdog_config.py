@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from evals.dafnybench.rawdog.config import RawdogConfig, get_config
 
 

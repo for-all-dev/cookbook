@@ -46,7 +46,10 @@ def categorize_error(stderr: str) -> str:
         return "tactic_failure"
     elif "termination" in stderr_lower or "structural recursion" in stderr_lower:
         return "termination_failure"
-    elif "unsolved goals" in stderr_lower or "don't know how to synthesize" in stderr_lower:
+    elif (
+        "unsolved goals" in stderr_lower
+        or "don't know how to synthesize" in stderr_lower
+    ):
         return "incomplete_proof"
     elif "unexpected" in stderr_lower or "expected" in stderr_lower:
         return "syntax_error"

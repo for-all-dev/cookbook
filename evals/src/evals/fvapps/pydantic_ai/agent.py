@@ -2,12 +2,12 @@
 
 import logging
 
-from pydantic_ai import Agent, RunContext
-
 from evals.fvapps.pydantic_ai.prompt import LEAN_FVAPPS_SYSTEM_PROMPT
 from evals.fvapps.pydantic_ai.tools import verify_lean
 from evals.fvapps.pydantic_ai.types import AgentResult, FVAPPSSample
 from evals.fvapps.pydantic_ai.utils import categorize_error, extract_code
+
+from pydantic_ai import Agent, RunContext
 
 
 class AgentDeps:

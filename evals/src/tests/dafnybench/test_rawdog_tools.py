@@ -1,6 +1,5 @@
 """Tests for rawdog tool-based hint insertion."""
 
-import pytest
 
 from evals.dafnybench.rawdog.tools import (
     find_insertion_point,

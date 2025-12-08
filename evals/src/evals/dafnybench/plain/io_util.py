@@ -26,7 +26,9 @@ def get_workspace_root() -> Path:
             if "[tool.uv.workspace]" in content:
                 return parent
 
-    raise RuntimeError("Could not find workspace root (pyproject.toml with [tool.uv.workspace])")
+    raise RuntimeError(
+        "Could not find workspace root (pyproject.toml with [tool.uv.workspace])"
+    )
 
 
 def setup_logging() -> None:
@@ -52,7 +54,9 @@ def setup_logging() -> None:
     )
 
 
-def save_artifact(test_id: str, attempt: int, code: str, is_final: bool = False) -> None:
+def save_artifact(
+    test_id: str, attempt: int, code: str, is_final: bool = False
+) -> None:
     """Save Dafny code artifact to artifacts/sample_<id>_attempt_<n>.dfy or _final.dfy.
 
     Args:

@@ -27,7 +27,9 @@ def aggregate_results(results: list[AgentResult]) -> EvalMetrics:
     error_distribution: dict[str, int] = {}
     for r in results:
         if not r.success and r.error_type:
-            error_distribution[r.error_type] = error_distribution.get(r.error_type, 0) + 1
+            error_distribution[r.error_type] = (
+                error_distribution.get(r.error_type, 0) + 1
+            )
 
     return EvalMetrics(
         total_samples=total,

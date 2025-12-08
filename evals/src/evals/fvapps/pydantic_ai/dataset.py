@@ -1,7 +1,6 @@
 """Dataset loading for FVAPPS."""
 
 from datasets import load_dataset
-
 from evals.fvapps.pydantic_ai.types import FVAPPSSample
 
 
