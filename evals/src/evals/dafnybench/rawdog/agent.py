@@ -376,7 +376,12 @@ def run_agent(
 
                     # Save artifact with current code
                     if result.get("code"):
-                        save_artifact(sample.test_id, attempts, result["code"])
+                        save_artifact(
+                            sample.test_id,
+                            attempts,
+                            result["code"],
+                            is_final=result["success"],
+                        )
 
                     if result["success"]:
                         # Verification succeeded!

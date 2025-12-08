@@ -60,13 +60,14 @@ def setup_logging() -> None:
     )
 
 
-def save_artifact(test_id: str, attempt: int, code: str) -> None:
-    """Save Dafny code artifact to artifacts/sample_<id>_attempt_<n>.dfy.
+def save_artifact(test_id: str, attempt: int, code: str, is_final: bool = False) -> None:
+    """Save Dafny code artifact to artifacts/sample_<id>_attempt_<n>.dfy or _final.dfy.
 
     Args:
         test_id: Test identifier from dataset
         attempt: Attempt number (1-indexed)
         code: Dafny code to save
+        is_final: If True, save as *_final.dfy (for successful verifications)
 
     Creates artifacts directory if it doesn't exist. Sanitizes test_id
     for use in filename.
@@ -76,6 +77,10 @@ def save_artifact(test_id: str, attempt: int, code: str) -> None:
 
     # Sanitize test_id for filename
     safe_id = test_id.replace("/", "_").replace("\\", "_")
-    artifact_path = artifacts_dir / f"sample_{safe_id}_attempt_{attempt}.dfy"
+
+    if is_final:
+        artifact_path = artifacts_dir / f"sample_{safe_id}_final.dfy"
+    else:
+        artifact_path = artifacts_dir / f"sample_{safe_id}_attempt_{attempt}.dfy"
 
     artifact_path.write_text(code)
