@@ -1,5 +1,6 @@
 """Type definitions and utilities for plain DafnyBench implementation."""
 
+import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -109,3 +110,40 @@ def save_artifact(test_id: str, attempt: int, code: str, is_final: bool = False)
         artifact_path = artifacts_dir / f"sample_{safe_id}_attempt_{attempt}.dfy"
 
     artifact_path.write_text(code)
+
+
+def save_conversation_history(
+    test_id: str,
+    timestamp: str,
+    messages: list[dict],
+    system_prompt: str | None = None,
+) -> None:
+    """Save full conversation history to logs/plain_<timestamp>_<sample_id>.json.
+
+    Args:
+        test_id: Test identifier from dataset
+        timestamp: Timestamp string (YYYYMMDD_HHMMSS format)
+        messages: Full message history array from Anthropic API
+        system_prompt: Optional system prompt to include in the conversation log
+
+    Creates logs directory in workspace root if it doesn't exist.
+    Sanitizes test_id for use in filename.
+    """
+    workspace_root = get_workspace_root()
+    logs_dir = workspace_root / "logs"
+    logs_dir.mkdir(exist_ok=True)
+
+    # Sanitize test_id for filename
+    safe_id = test_id.replace("/", "_").replace("\\", "_")
+
+    log_path = logs_dir / f"plain_{timestamp}_{safe_id}.json"
+
+    # Build conversation object with system prompt and messages
+    conversation = {
+        "test_id": test_id,
+        "timestamp": timestamp,
+        "system_prompt": system_prompt,
+        "messages": messages,
+    }
+
+    log_path.write_text(json.dumps(conversation, indent=2, default=str))

@@ -4,6 +4,157 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+# Tool definitions (Anthropic API format)
+INSERT_INVARIANT_TOOL = {
+    "name": "insert_invariant",
+    "description": "Insert a loop invariant at specified location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "invariant": {
+                "type": "string",
+                "description": "Invariant expression",
+            },
+            "line_number": {
+                "type": "integer",
+                "description": "Line number (1-indexed, optional)",
+            },
+            "context_before": {
+                "type": "string",
+                "description": "Line before insertion point (optional)",
+            },
+            "context_after": {
+                "type": "string",
+                "description": "Line after insertion point (optional)",
+            },
+        },
+        "required": ["invariant"],
+    },
+}
+
+INSERT_ASSERTION_TOOL = {
+    "name": "insert_assertion",
+    "description": "Insert an assertion at specified location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "assertion": {
+                "type": "string",
+                "description": "Assertion expression",
+            },
+            "line_number": {
+                "type": "integer",
+                "description": "Line number (1-indexed, optional)",
+            },
+            "context_before": {
+                "type": "string",
+                "description": "Line before insertion point (optional)",
+            },
+            "context_after": {
+                "type": "string",
+                "description": "Line after insertion point (optional)",
+            },
+        },
+        "required": ["assertion"],
+    },
+}
+
+INSERT_PRECONDITION_TOOL = {
+    "name": "insert_precondition",
+    "description": "Insert a function precondition (requires clause) at specified location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "precondition": {
+                "type": "string",
+                "description": "Precondition expression",
+            },
+            "line_number": {
+                "type": "integer",
+                "description": "Line number (1-indexed, optional)",
+            },
+            "context_before": {
+                "type": "string",
+                "description": "Line before insertion point (optional)",
+            },
+            "context_after": {
+                "type": "string",
+                "description": "Line after insertion point (optional)",
+            },
+        },
+        "required": ["precondition"],
+    },
+}
+
+INSERT_POSTCONDITION_TOOL = {
+    "name": "insert_postcondition",
+    "description": "Insert a function postcondition (ensures clause) at specified location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "postcondition": {
+                "type": "string",
+                "description": "Postcondition expression",
+            },
+            "line_number": {
+                "type": "integer",
+                "description": "Line number (1-indexed, optional)",
+            },
+            "context_before": {
+                "type": "string",
+                "description": "Line before insertion point (optional)",
+            },
+            "context_after": {
+                "type": "string",
+                "description": "Line after insertion point (optional)",
+            },
+        },
+        "required": ["postcondition"],
+    },
+}
+
+INSERT_MEASURE_TOOL = {
+    "name": "insert_measure",
+    "description": "Insert a termination measure (decreases clause) at specified location",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "measure": {"type": "string", "description": "Decreases expression"},
+            "line_number": {
+                "type": "integer",
+                "description": "Line number (1-indexed, optional)",
+            },
+            "context_before": {
+                "type": "string",
+                "description": "Line before insertion point (optional)",
+            },
+            "context_after": {
+                "type": "string",
+                "description": "Line after insertion point (optional)",
+            },
+        },
+        "required": ["measure"],
+    },
+}
+
+VERIFY_DAFNY_TOOL = {
+    "name": "verify_dafny",
+    "description": "Verify the current code state with all hints inserted so far. "
+    "Returns verification results and full rendered code.",
+    "input_schema": {
+        "type": "object",
+        "properties": {},  # No parameters - reads from state
+    },
+}
+
+TOOLS = [
+    INSERT_INVARIANT_TOOL,
+    INSERT_ASSERTION_TOOL,
+    INSERT_PRECONDITION_TOOL,
+    INSERT_POSTCONDITION_TOOL,
+    INSERT_MEASURE_TOOL,
+    VERIFY_DAFNY_TOOL,
+]
 
 # ===== Phase 1: State Management =====
 

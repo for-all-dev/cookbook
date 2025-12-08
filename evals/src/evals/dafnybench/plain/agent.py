@@ -8,11 +8,13 @@ regenerate complete files.
 """
 
 import logging
+from datetime import datetime
 
 import anthropic
 from evals.dafnybench.inspect_ai.utils import categorize_error
 from evals.dafnybench.plain.config import get_config
 from evals.dafnybench.plain.tools import (
+    TOOLS,
     get_code_state,
     insert_assertion,
     insert_invariant,
@@ -22,159 +24,12 @@ from evals.dafnybench.plain.tools import (
     update_code_state,
     verify_dafny,
 )
-from evals.dafnybench.plain.types import AgentResult, EvalSample, save_artifact
-
-# Tool definitions (Anthropic API format)
-INSERT_INVARIANT_TOOL = {
-    "name": "insert_invariant",
-    "description": "Insert a loop invariant at specified location",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "invariant": {
-                "type": "string",
-                "description": "Invariant expression",
-            },
-            "line_number": {
-                "type": "integer",
-                "description": "Line number (1-indexed, optional)",
-            },
-            "context_before": {
-                "type": "string",
-                "description": "Line before insertion point (optional)",
-            },
-            "context_after": {
-                "type": "string",
-                "description": "Line after insertion point (optional)",
-            },
-        },
-        "required": ["invariant"],
-    },
-}
-
-INSERT_ASSERTION_TOOL = {
-    "name": "insert_assertion",
-    "description": "Insert an assertion at specified location",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "assertion": {
-                "type": "string",
-                "description": "Assertion expression",
-            },
-            "line_number": {
-                "type": "integer",
-                "description": "Line number (1-indexed, optional)",
-            },
-            "context_before": {
-                "type": "string",
-                "description": "Line before insertion point (optional)",
-            },
-            "context_after": {
-                "type": "string",
-                "description": "Line after insertion point (optional)",
-            },
-        },
-        "required": ["assertion"],
-    },
-}
-
-INSERT_PRECONDITION_TOOL = {
-    "name": "insert_precondition",
-    "description": "Insert a function precondition (requires clause) at specified location",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "precondition": {
-                "type": "string",
-                "description": "Precondition expression",
-            },
-            "line_number": {
-                "type": "integer",
-                "description": "Line number (1-indexed, optional)",
-            },
-            "context_before": {
-                "type": "string",
-                "description": "Line before insertion point (optional)",
-            },
-            "context_after": {
-                "type": "string",
-                "description": "Line after insertion point (optional)",
-            },
-        },
-        "required": ["precondition"],
-    },
-}
-
-INSERT_POSTCONDITION_TOOL = {
-    "name": "insert_postcondition",
-    "description": "Insert a function postcondition (ensures clause) at specified location",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "postcondition": {
-                "type": "string",
-                "description": "Postcondition expression",
-            },
-            "line_number": {
-                "type": "integer",
-                "description": "Line number (1-indexed, optional)",
-            },
-            "context_before": {
-                "type": "string",
-                "description": "Line before insertion point (optional)",
-            },
-            "context_after": {
-                "type": "string",
-                "description": "Line after insertion point (optional)",
-            },
-        },
-        "required": ["postcondition"],
-    },
-}
-
-INSERT_MEASURE_TOOL = {
-    "name": "insert_measure",
-    "description": "Insert a termination measure (decreases clause) at specified location",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "measure": {"type": "string", "description": "Decreases expression"},
-            "line_number": {
-                "type": "integer",
-                "description": "Line number (1-indexed, optional)",
-            },
-            "context_before": {
-                "type": "string",
-                "description": "Line before insertion point (optional)",
-            },
-            "context_after": {
-                "type": "string",
-                "description": "Line after insertion point (optional)",
-            },
-        },
-        "required": ["measure"],
-    },
-}
-
-VERIFY_DAFNY_TOOL = {
-    "name": "verify_dafny",
-    "description": "Verify the current code state with all hints inserted so far. "
-    "Returns verification results and full rendered code.",
-    "input_schema": {
-        "type": "object",
-        "properties": {},  # No parameters - reads from state
-    },
-}
-
-TOOLS = [
-    INSERT_INVARIANT_TOOL,
-    INSERT_ASSERTION_TOOL,
-    INSERT_PRECONDITION_TOOL,
-    INSERT_POSTCONDITION_TOOL,
-    INSERT_MEASURE_TOOL,
-    VERIFY_DAFNY_TOOL,
-]
+from evals.dafnybench.plain.types import (
+    AgentResult,
+    EvalSample,
+    save_artifact,
+    save_conversation_history,
+)
 
 
 def run_agent(
@@ -206,6 +61,9 @@ def run_agent(
     # Use config defaults if not specified
     if max_iterations is None:
         max_iterations = config.evaluation.max_iterations
+
+    # Generate timestamp for logging
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # Initialize Anthropic client
     client = anthropic.Anthropic()
@@ -453,6 +311,14 @@ def run_agent(
             result = verify_dafny(messages)
             error_type = categorize_error(result.get("stderr", ""))
             logger.warning(f"Failed after {attempts} attempts: {error_type}")
+
+    # Save full conversation history to JSON
+    save_conversation_history(
+        test_id=sample.test_id,
+        timestamp=timestamp,
+        messages=messages,
+        system_prompt=config.prompt.system_prompt,
+    )
 
     return AgentResult(
         sample_id=sample.test_id,
