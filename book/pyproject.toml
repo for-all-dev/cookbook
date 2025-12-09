@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "jupyter-book>=2.0.2",
+    "jupyter-book>=2.1.0",
     "evals",
     "matplotlib>=3.10.7",
     "pillow>=12.0.0",
