@@ -11,3 +11,10 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "⬆"
+
+  - package-ecosystem: "uv"
+    directory: "/book"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "⬆"
