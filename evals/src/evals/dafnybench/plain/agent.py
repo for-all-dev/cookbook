@@ -12,7 +12,7 @@ from datetime import datetime
 
 import anthropic
 from evals.dafnybench.inspect_ai.utils import categorize_error
-from evals.dafnybench.plain.config import get_config
+from evals.dafnybench.plain.config import get_config, normalize_model_name
 from evals.dafnybench.plain.io_util import save_artifact, save_conversation_history
 from evals.dafnybench.plain.structures import AgentResult, EvalSample
 from evals.dafnybench.plain.tools import (
@@ -233,8 +233,7 @@ def run_agent(
     client = anthropic.Anthropic()
 
     # Strip "anthropic/" prefix from model name if present (inspect-ai format)
-    if model.startswith("anthropic/"):
-        model = model.replace("anthropic/", "")
+    model = normalize_model_name(model)
 
     # Initialize message history with code state (using template from config)
     initial_state = config.prompt.initial_state_template.format(

@@ -126,3 +126,17 @@ def load_config(config_path: Path | str) -> PlainConfig:
     global _config
     _config = PlainConfig.from_file(config_path)
     return _config
+
+
+def normalize_model_name(model: str) -> str:
+    """Strip 'anthropic/' prefix from model name if present (inspect-ai format).
+
+    Args:
+        model: Model name that may have 'anthropic/' prefix
+
+    Returns:
+        Model name without 'anthropic/' prefix
+    """
+    if model.startswith("anthropic/"):
+        return model.replace("anthropic/", "")
+    return model
