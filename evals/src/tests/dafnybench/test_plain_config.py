@@ -59,6 +59,7 @@ def test_config_file_location():
     """Test that config file exists at expected location."""
     from evals.dafnybench.plain import config as config_module
 
+    assert config_module.__file__ is not None
     config_path = Path(config_module.__file__).parent / "config.toml"
     assert config_path.exists()
     assert config_path.is_file()
