@@ -26,6 +26,7 @@
             pandoc
             util-linux  # ionice
             claude-code
+            gemini-cli
             ripgrep
           ];
         in pkgs.mkShell { inherit name buildInputs; };
