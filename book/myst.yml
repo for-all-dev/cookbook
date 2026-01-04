@@ -1,0 +1,37 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: dbdf11b8-86a4-4da5-b9fc-05e4d01f51c5
+  title: prealpha; Formal Verification Agent Recipes
+  description: |
+    Bridging the two cultures between formal verification and modern agentic language systems
+  keywords: []
+  authors: []
+  github: https://github.com/for-all-dev/cookbook
+  toc:
+    - file: 00-index.md
+      hidden: true
+    - title: Introduction
+      children:
+        - pattern: 01-introduction/*.md
+    - title: "Dafny part 1: with a framework"
+      children:
+        - pattern: 02-dafny-and-inspect/*.md
+    - title: "Dafny part 2: plain Python"
+      children:
+        - pattern: 03-dafny-and-plain/*.md
+    - title: Lean
+      children:
+        - pattern: 04-lean-and-pydanticai/*.md
+    - title: RL
+      children:
+        - pattern: 05-rl/*.md
+    - title: Outlook
+      children:
+        - pattern: 06-outlook/*.md
+site:
+  template: book-theme
+  options:
+    folders: true
+    favicon: ./static/img/forall.ico
+    logo: ./static/img/workspace-banner-4.png
