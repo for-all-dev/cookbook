@@ -12,7 +12,7 @@ In distant land, unreachable by your steps, there stands a castle known as Monsa
 -- Lohengrin, *Lohengrin* Act III, Scene 3
 ```
 
-# TODO: this is an ALPHA. This is not released yet.
+this is an ALPHA. This is not released yet.
 
 Please don't send it around to your friends yet.
 
