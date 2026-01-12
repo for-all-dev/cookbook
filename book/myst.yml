@@ -23,12 +23,15 @@ project:
     - title: Lean
       children:
         - pattern: 04-lean-and-pydanticai/*.md
+    - title: DalekGitBench
+      children:
+        - pattern: 05-dalek-git-bench/*.md
     - title: RL
       children:
-        - pattern: 05-rl/*.md
+        - pattern: 06-rl/*.md
     - title: Outlook
       children:
-        - pattern: 06-outlook/*.md
+        - pattern: 07-outlook/*.md
 site:
   template: book-theme
   options:
