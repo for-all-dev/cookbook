@@ -1,0 +1,25 @@
+[mining]
+repo_path = "./data/curve25519-dalek-lean-verify"
+start_ref = "master"
+max_commits = -1  # -1 = all commits
+
+[filtering]
+min_theorem_count = 1
+min_tactic_blocks = 1
+exclude_paths = [
+    "Utils/",
+    "scripts/",
+    ".github/",
+]
+
+[verification]
+timeout_seconds = 300
+lake_command = "lake build"
+
+[output]
+jsonl_path = "./artifacts/dalek_challenges.jsonl"
+log_dir = "./logs"
+save_artifacts = true
+
+[logging]
+level = "INFO"
