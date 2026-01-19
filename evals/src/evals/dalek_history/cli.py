@@ -28,9 +28,7 @@ def generate(
     ] = None,
     output: Annotated[
         str | None,
-        typer.Option(
-            "--output", "-o", help="Output JSONL path (default: from config)"
-        ),
+        typer.Option("--output", "-o", help="Output JSONL path (default: from config)"),
     ] = None,
     limit: Annotated[
         int,

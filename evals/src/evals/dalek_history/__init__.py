@@ -47,9 +47,7 @@ def identify_candidates(repo: Repo, config: Config) -> list[CommitCandidate]:
 
     logger.info("Phase A: Identifying candidate commits")
 
-    for commit in get_commit_iterator(
-        Path(repo.working_dir), config.mining.start_ref
-    ):
+    for commit in get_commit_iterator(Path(repo.working_dir), config.mining.start_ref):
         processed += 1
 
         # Check max_commits limit
@@ -58,7 +56,9 @@ def identify_candidates(repo: Repo, config: Config) -> list[CommitCandidate]:
             break
 
         if processed % 10 == 0:
-            logger.info(f"Processed {processed} commits, found {len(candidates)} candidates")
+            logger.info(
+                f"Processed {processed} commits, found {len(candidates)} candidates"
+            )
 
         # Get modified files
         current_files, _ = get_modified_files(commit)
@@ -115,7 +115,9 @@ def identify_candidates(repo: Repo, config: Config) -> list[CommitCandidate]:
                 f"Found candidate: {commit.hexsha[:8]} - {commit.message.strip()[:50]}"
             )
 
-    logger.info(f"Phase A complete: {len(candidates)} candidates from {processed} commits")
+    logger.info(
+        f"Phase A complete: {len(candidates)} candidates from {processed} commits"
+    )
     return candidates
 
 
@@ -170,7 +172,9 @@ def validate_candidate(
 
         # Check if this is a valid verification error
         if not result_broken.success and is_verification_error(result_broken.stderr):
-            logger.info(f"Valid challenge found: {candidate.commit_hash[:8]} - {proof_file}")
+            logger.info(
+                f"Valid challenge found: {candidate.commit_hash[:8]} - {proof_file}"
+            )
 
             # Get the diff showing the fix
             author_fix_diff = get_file_diff(repo, commit, proof_file)

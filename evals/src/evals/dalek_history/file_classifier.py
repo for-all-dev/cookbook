@@ -93,10 +93,7 @@ def classify_file(file_path: Path) -> FileClassification:
 
     # Classify based on heuristics
     is_definition = (
-        contains_aeneas
-        or def_count > 0
-        or inductive_count > 0
-        or structure_count > 0
+        contains_aeneas or def_count > 0 or inductive_count > 0 or structure_count > 0
     )
 
     is_proof = theorem_count > 0 or lemma_count > 0 or tactic_block_count >= 3

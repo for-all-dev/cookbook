@@ -1,9 +1,10 @@
 """Configuration loading for the dalek history mining pipeline."""
 
 import logging
-import tomllib
 from dataclasses import dataclass
 from pathlib import Path
+
+import tomllib
 
 
 @dataclass
