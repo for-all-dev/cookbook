@@ -8,7 +8,7 @@ dependencies = [
     "jupyter-book>=2.1.0",
     "evals",
     "matplotlib>=3.10.7",
-    "pillow>=12.0.0",
+    "pillow>=12.2.0",
     "numpy>=2.3.5",
     "fonttools>=4.60.1",
 ]
