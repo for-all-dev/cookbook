@@ -20,6 +20,6 @@ convention = "google"
 dev = [
     "hypothesis>=6.148.1",
     "pytest>=9.0.1",
-    "ruff>=0.14.5",
+    "ruff>=0.15.10",
     "ty>=0.0.1a32",
 ]
