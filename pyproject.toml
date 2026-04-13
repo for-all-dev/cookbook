@@ -18,7 +18,7 @@ convention = "google"
 
 [dependency-groups]
 dev = [
-    "hypothesis>=6.148.1",
+    "hypothesis>=6.151.12",
     "pytest>=9.0.1",
     "ruff>=0.14.5",
     "ty>=0.0.1a32",
