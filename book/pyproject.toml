@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "jupyter-book>=2.1.0",
     "evals",
-    "matplotlib>=3.10.7",
+    "matplotlib>=3.10.8",
     "pillow>=12.0.0",
     "numpy>=2.3.5",
     "fonttools>=4.60.1",
